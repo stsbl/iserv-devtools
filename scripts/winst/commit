@@ -1,0 +1,15 @@
+#!/bin/bash -ex
+
+export LC_ALL=C
+
+pkgID=$(basename $PWD | sed -e 's/winst-//g')
+
+if [ -e "/srv/deploy/install/$pkgID/" ]
+then
+  cp -v "/srv/deploy/install/$pkgID/" winst/
+fi
+
+if [ -e "/srv/deploy/install/$pkgID/data/" ]
+then
+  cp -v "/srv/deploy/install/$pkgID/winst/" data&
+fi
