@@ -1,6 +1,7 @@
 #!/bin/bash -ex
 
 export LC_ALL=C
+helper=$(which stsbl-dev-python-helper)
 
 for i in lib iconf src priv share config sbin bin iservchk
 do
@@ -8,22 +9,22 @@ do
   if [ "$i" = "share" ]
   then
     find $i/ -mindepth 1 -type d -exec mkdir -pv "$i.collect"/{} \;
-    find $i/ -mindepth 1 -type f -exec bash -c "file={}; install-scripts/python-wrapper \${file/share\///} $i 'share/' '' '' 'share'" \;
+    find $i/ -mindepth 1 -type f -exec bash -c "file={}; $helper \${file/share\///} $i 'share/' '' '' 'share'" \;
   elif [ "$i" = "config" ]
   then
     find $i/ -mindepth 1 -type d -exec mkdir -pv "$i.collect"/{} \;
-    find $i/ -mindepth 1 -type f -exec install-scripts/python-wrapper {} $i '' 'iservcfg/' \;
+    find $i/ -mindepth 1 -type f -exec $helper {} $i '' 'iservcfg/' \;
   elif [ "$i" = "iservchk" ]
   then
     find $i/ -mindepth 1 -type d -exec mkdir -pv "$i.collect"/{} \;
-    find $i/ -mindepth 1 -type f -exec install-scripts/python-wrapper {} $i '' 'iconf/etc/iserv/chk.d/' 'iservchk' \;
+    find $i/ -mindepth 1 -type f -exec $helper {} $i '' 'iconf/etc/iserv/chk.d/' 'iservchk' \;
   elif [ "$i" = "lib" ] || [ "$i" = "sbin" ] || [ "$i" = "bin" ]
   then
     find $i/ -mindepth 1 -type d -exec bash -c 'mkdir -pv "$i.collect"/$(basename {))' \;
     find $i/ -mindepth 1 -type f -exec bash -c cp\ /usr/$(path=$(echo $i | tr "/" "\n"); if [ "${path[0]}" = "lib" ]; then echo "lib/iserv"; else echo $i; fi)/\$\(basename\ {}\)\ "$i.collect/$i" \;
   else
     find $i/ -mindepth 1 -type d -exec mkdir -pv "$i.collect/"{} \;
-    find $i/ -mindepth 1 -type f -exec install-scripts/python-wrapper {} $i \;
+    find $i/ -mindepth 1 -type f -exec $helper {} $i \;
   fi
 
   rm -rfv $i/
