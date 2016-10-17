@@ -16,7 +16,7 @@ fi
 
 cp -rv winst/* /srv/deploy/install/$pkgID
 
-if [ -e "$PWD/data/*" ]
+if [ -e "$PWD/data/" ]
 then
   cp -rv data/* /srv/deploy/install/$pkgID/data/
 fi
