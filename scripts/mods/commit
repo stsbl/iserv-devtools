@@ -5,7 +5,13 @@ helper=$(which stsbl-dev-python-helper)
 
 for i in lib iconf src priv share config sbin bin iservchk roles
 do
+  if [ ! -e "$pwd/$i/" ]
+  then
+    continue
+  fi
+
   mkdir -pv "$i.collect/$i"
+  
   if [ "$i" = "share" ]
   then
     find $i/ -mindepth 1 -type d -exec mkdir -pv "$i.collect"/{} \;
