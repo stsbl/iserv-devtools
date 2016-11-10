@@ -1,0 +1,36 @@
+#!/bin/bash -e
+
+export LC_ALL=en_US.utf8
+export EDITOR=/usr/bin/vim
+
+CONFIGDIRPREFIX=/usr/local
+
+if [ "$#" -lt "1" ]
+then
+  echo "You need to supply a version number with $0 <number>." >&2
+  exit 1
+fi
+
+if [ "$#" -gt "3" ]
+then 
+  SINCE="$4" 
+else
+  SINCE=""
+fi;
+
+gbp dch -U $(if [ "$#" -gt "1" ]; then echo $2; else echo "medium"; fi) -D experimental --no-git-author --full -R -N $1 --since "$(if [ "$SINCE" = "" ]; then git log --all | grep -B 4 -m 1 -i "Update changelog" | head -n 1 | awk '{ print $2 }'; else echo $SINCE; fi;)"
+
+
+cat $CONFIGDIRPREFIX/etc/stsbl/repository/mail-mapper | while read i
+do
+  sed -i "s/$(echo $i | awk '{ print $1 }' | sed -re "s/\./\\\./g")/$(echo $i | awk '{ $1= ""; print $0 }' | sed -re "s/^.{1}//" | sed -e 's/\ /\\\ /g')/1" debian/changelog
+done
+
+if [ "$#" -gt "2" ]
+then
+  ORIGUPLOADMAINTAINER=$(pcregrep -M "^  \[ (.*) \]$\n\n" debian/changelog | head -n 1 | sed -e "s/\[/\\\[/g" | sed -e "s/\]/\\\]/g" )
+  php -r "\$replace = preg_replace('~\n  $(echo $ORIGUPLOADMAINTAINER)\n\n~', \"\n  [ $3 ]\n\n\", file_get_contents('debian/changelog'), 1); file_put_contents('debian/changelog', \$replace);"
+fi
+
+git add debian/changelog
+git commit -m "Update changelog for $1 release."

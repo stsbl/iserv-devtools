@@ -1,0 +1,31 @@
+#!/bin/bash
+
+export LC_ALL=C
+
+VERSIONSTRING=$(pcregrep -M "^(.*) \((.*)\) (.*); urgency=(.*)$" debian/changelog | head -n 1)
+PACKAGE=$(echo $VERSIONSTRING | awk '{ print $1 }')
+VERSION=$(echo $VERSIONSTRING | awk '{ print $2 }' | replace '(' '' | replace ')' '')
+UPSTREAMVERSION=${VERSION%-*}
+
+# create pseudo orig archive to prevent dpkg abort on debian systems
+if [ -e "../""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" ]
+then
+  rm "../""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz"
+fi
+
+tar cfJ "../""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" .  --exclude=.gitignore --exclude=./debian/.git/ --exclude=./debian/
+
+#if [ ! -e debian/patches ]
+#then
+#  mkdir debian/patches
+#fi
+#
+#if [ ! -e debian/patches/orig ]
+#then
+#  touch debian/patches/orig
+#fi
+
+dpkg-buildpackage
+#echo "Creating diff..."
+#dpkg-source --commit ./ orig debian/patches/orig
+#dpkg-buildpackage -S
