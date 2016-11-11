@@ -13,7 +13,7 @@ then
   rm "../""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz"
 fi
 
-tar cfJ "../""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" .  --exclude=.gitignore --exclude=.git/ --exclude=debian/
+tar --exclude="./.gitignore" --exclude="./.git" --exclude="./debian" -Jcf "../""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" .
 
 #if [ ! -e debian/patches ]
 #then
