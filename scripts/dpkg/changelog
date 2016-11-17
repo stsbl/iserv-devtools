@@ -18,7 +18,7 @@ else
   SINCE=""
 fi;
 
-gbp dch -U $(if [ "$#" -gt "1" ]; then echo $2; else echo "medium"; fi) -D experimental --no-git-author --full -R -N $1 --since "$(if [ "$SINCE" = "" ]; then git log --all | grep -B 4 -m 1 -i "Update changelog" | head -n 1 | awk '{ print $2 }'; else echo $SINCE; fi;)"
+gbp dch -U $(if [ "$#" -gt "1" ]; then echo $2; else echo "medium"; fi) -D experimental --full -R -N $1 --since "$(if [ "$SINCE" = "" ]; then git log --all | grep -B 4 -m 1 -i "Update changelog" | head -n 1 | awk '{ print $2 }'; else echo $SINCE; fi;)"
 
 
 cat $CONFIGDIRPREFIX/etc/stsbl/repository/mail-mapper | while read i
