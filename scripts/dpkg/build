@@ -16,11 +16,17 @@ fi
 
 tar --files-from /dev/null -Jcf "../""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz"
 
+# Merge all files into a patch.
 if [ -d "debian/patches/" ]
 then
   rm -rf debian/patches/
 fi
 
 dpkg-source --commit ./ upstream
+
+# Whitelist all
+echo > debian/source/include-binaries
+find -type f -not -path "./debian/" -not -path "./git/" -not -path "./gitignore" -exec $(which bash) -c "echo {} >> debian/source/include-binaries" \;
+sed -i "s/^\.\///g" debian/source/include-binaries
 
 dpkg-buildpackage
