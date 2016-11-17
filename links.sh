@@ -2,6 +2,7 @@
 
 export LC_ALL=C
 
+ln -sf $PWD/tools/dummy-editor /usr/local/bin/dummy-editor
 ln -sf $PWD/scripts/winst/commit /usr/local/sbin/stsbl-dev-winst-commit-files
 ln -sf $PWD/scripts/winst/install /usr/local/sbin/stsbl-dev-winst-install-files
 ln -sf $PWD/scripts/mods/commit /usr/local/sbin/stsbl-dev-mod-commit-files
