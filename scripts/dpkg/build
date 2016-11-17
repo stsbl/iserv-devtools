@@ -86,7 +86,7 @@ ln -sfv ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UP
 ln -sfv ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".dsc ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".dsc
 ln -sfv ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".debian.tar.xz ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".debian.tar.xz
 
-for i in $ADDTIONALBINARYPACKAGES
+for i in $ADDITIONALBINARYPACKAGES
 do
   # link deb file
   if [ -e "../""$i""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ] && [ -L "../$i""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ]
