@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 export LC_ALL=C
 
@@ -15,17 +15,11 @@ fi
 
 tar --files-from /dev/null -Jcf "../""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz"
 
-#if [ ! -e debian/patches ]
-#then
-#  mkdir debian/patches
-#fi
-#
-#if [ ! -e debian/patches/orig ]
-#then
-#  touch debian/patches/orig
-#fi
+if [ -d "debian/patches/" ]
+then
+  rm -rf debian/patches/
+fi
+
+dpkg-source --commit ./ upstream
 
 dpkg-buildpackage
-#echo "Creating diff..."
-#dpkg-source --commit ./ orig debian/patches/orig
-#dpkg-buildpackage -S
