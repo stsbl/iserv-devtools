@@ -1,6 +1,7 @@
 #!/bin/bash -e
 
 export LC_ALL=C
+export EDITOR=$(which dummy-editor)
 
 VERSIONSTRING=$(pcregrep -M "^(.*) \((.*)\) (.*); urgency=(.*)$" debian/changelog | head -n 1)
 PACKAGE=$(echo $VERSIONSTRING | awk '{ print $1 }')
