@@ -81,10 +81,10 @@ fi
 
 
 # link destinations
-sudo ln -fv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz ../"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz
-sudo ln -fv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION"_all.deb ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
-sudo ln -fv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".dsc ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".dsc
-sudo ln -fv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".dsc ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".debian.tar.xz
+ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz ../"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz
+ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION"_all.deb ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
+ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".dsc ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".dsc
+ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".tar.xz ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".debian.tar.xz
 
 for i in $ADDTIONALBINARYPACKAGES
 do
@@ -103,7 +103,7 @@ do
     touch ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
   fi
 
-  sudo ln -fv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb ../"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
+  ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb ../"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
 done
 
 tar --exclude="./debian/" --exclude="./git/" --exclude="./.gitignore" -Jcf ../"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz .
