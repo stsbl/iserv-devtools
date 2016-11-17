@@ -11,40 +11,40 @@ UPSTREAMVERSION=${VERSION%-*}
 REVISION=${VERSION#*-}
 
 # create pseudo orig archive to prevent dpkg abort on debian systems
-if [ -e ../package-pool/""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" ] && [ -L ../package-pool/""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" ]
+if [ -e "../""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" ] && [ -L "../""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" ]
 then
-  rm -f ../package-pool/"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz
-elif [ -e ../package-pool/""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" ] && [ ! -L ../package-pool/""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" ]
+  rm -f ../"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz
+elif [ -e "../""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" ] && [ ! -L "../""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" ]
 then
   echo "Destination .orig.tar.xz exists and is not a symbolic link! Terminating!" >&2
   exit 1
 fi
 
 # link deb file
-if [ -e ../package-pool/""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON""_all.deb" ] && [ -L "../$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON""_all.deb" ]
+if [ -e "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISiON""_all.deb" ] && [ -L "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISiON""_all.deb" ]
 then
-  rm -f ../package-pool/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISON"_all.deb
-elif [ -e ../package-pool/""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON""_all.deb" ] && [ ! -L "../$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON""_all.deb" ]
+  rm -f ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISiON"_all.deb
+elif [ -e "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISiON""_all.deb" ] && [ ! -L "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISiON""_all.deb" ]
 then
   echo "Destination .deb exists and is not a symbolic link! Terminating!" >&2
   exit 1
 fi
 
 # link dsc file
-if [ -e ../package-pool/""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON"".dsc" ] && [ -L "../$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON"".dsc" ]
+if [ -e "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISiON"".dsc" ] && [ -L "../$PACKAGE""_""$UPSTREAMVERSION""-""$REVISiON"".dsc" ]
 then
-  rm -f ../package-pool/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISON".dsc
-elif [ -e ../package-pool/""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON"".dsc" ] && [ ! -L "../$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON"".dsc" ]
+  rm -f ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISiON".dsc
+elif [ -e "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISiON"".dsc" ] && [ ! -L "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISiON"".dsc" ]
 then
   echo "Destination .dsc exists and is not a symbolic link! Terminating!" >&2
   exit 1
 fi
 
 # link debian.tar.xz file
-if [ -e ../package-pool/""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON"".debian.tar.xz" ] && [ -L "../$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON"".debian.tar.xz" ]
+if [ -e "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISiON"".debian.tar.xz" ] && [ -L "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISiON"".debian.tar.xz" ]
 then
-  rm -f ../package-pool/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISON".debian.tar.xz
-elif [ -e ../package-pool/""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON"".debian.tar.xz" ] && [ ! -L "../$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON"".debian.tar.xz" ]
+  rm -f ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISiON".debian.tar.xz
+elif [ -e "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISiON"".debian.tar.xz" ] && [ ! -L "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISiON"".debian.tar.xz" ]
 then
   echo "Destination .debian.tar.xz exists and is not a symbolic link! Terminating!" >&2
   exit 1
@@ -59,51 +59,51 @@ then
 fi
 
 # create desitionations
-if [ ! -e ../package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" ]
+if [ ! -e "../package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" ]
 then
   touch ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz
 fi
 
-if [ ! -e ../package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ]
+if [ ! -e "../package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ]
 then
   touch ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
 fi
 
-if [ ! -e ../package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISION"".dsc" ]
+if [ ! -e "../package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISION"".dsc" ]
 then
   touch ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".dsc
 fi
 
-if [ ! -e ../package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISION"".debian.tar.xz" ]
+if [ ! -e "../package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISION"".debian.tar.xz" ]
 then
   touch ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".debian.tar.xz
 fi
 
 
 # link destinations
-ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz ../package-pool/"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz
-ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISON"_all.deb ../package-pool/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISON"_all.deb
-ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISON".dsc ../package-pool/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISON".dsc
-ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISON".dsc ../package-pool/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISON".debian.tar.xz
+ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz ../"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz
+ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISiON"_all.deb ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISiON"_all.deb
+ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISiON".dsc ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISiON".dsc
+ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISiON".dsc ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISiON".debian.tar.xz
 
 for in $1
 do
   # link deb file
-  if [ -e "../""$i""_""$UPSTREAMVERSION""-""$REVISON""_all.deb" ] && [ -L "../$i""_""$UPSTREAMVERSION""-""$REVISON""_all.deb" ]
+  if [ -e "../""$i""_""$UPSTREAMVERSION""-""$REVISiON""_all.deb" ] && [ -L "../$i""_""$UPSTREAMVERSION""-""$REVISiON""_all.deb" ]
   then
-    rm -f ../"$i"_"$UPSTREAMVERSION"-"$REVISON"_all.deb
-  elif [ -e "../""$i""_""$UPSTREAMVERSION""-""$REVISON""_all.deb" ] && [ ! -L "../$i""_""$UPSTREAMVERSION""-""$REVISON""_all.deb" ]
+    rm -f ../"$i"_"$UPSTREAMVERSION"-"$REVISiON"_all.deb
+  elif [ -e "../""$i""_""$UPSTREAMVERSION""-""$REVISiON""_all.deb" ] && [ ! -L "../$i""_""$UPSTREAMVERSION""-""$REVISiON""_all.deb" ]
   then
     echo "Destination .deb exists and is not a symbolic link! Terminating!" >&2
     exit 1
   fi
 
-  if [ ! -e ../package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$i""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ]
+  if [ ! -e "../package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$i""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ]
   then
     touch ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
   fi
 
-  ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$i"_"$UPSTREAMVERSION"-"$REVISON"_all.deb ../"$i"_"$UPSTREAMVERSION"-"$REVISON"_all.deb
+  ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$i"_"$UPSTREAMVERSION"-"$REVISiON"_all.deb ../"$i"_"$UPSTREAMVERSION"-"$REVISiON"_all.deb
 done
 
 tar --exclude="./debian/" --exclude="./git/" --exclude="./.gitignore" -Jcf ../package-pool/"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz .
