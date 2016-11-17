@@ -106,7 +106,7 @@ do
   ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb ../"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
 done
 
-tar --exclude="./debian/" --exclude="./.git/" --exclude="./.gitignore" -Jcf ../"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz .
+tar --exclude="./.gitignore" --exclude="./.git" --exclude="./debian" -Jcf ../"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz .
 
 dpkg-buildpackage
 
