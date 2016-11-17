@@ -3,33 +3,109 @@
 export LC_ALL=C
 export EDITOR=$(which dummy-editor)
 
+ADDITIONALBINARYPACKAGES=$1
 VERSIONSTRING=$(pcregrep -M "^(.*) \((.*)\) (.*); urgency=(.*)$" debian/changelog | head -n 1)
 PACKAGE=$(echo $VERSIONSTRING | awk '{ print $1 }')
 VERSION=$(echo $VERSIONSTRING | awk '{ print $2 }' | replace '(' '' | replace ')' '')
 UPSTREAMVERSION=${VERSION%-*}
+REVISION=${VERSION#*-}
 
 # create pseudo orig archive to prevent dpkg abort on debian systems
-if [ -e "../""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" ]
+if [ -e "../""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" ] && [ -L "../""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" ]
 then
-  rm "../""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz"
+  rm -f ../"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz
+elif [ -e "../""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" ] && [ ! -L "../""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" ]
+then
+  echo "Destination .orig.tar.xz exists and is not a symbolic link! Terminating!" >&2
+  exit 1
 fi
 
-tar --exclude="./debian/" --exclude="./git/" --exclude="./.gitignore" -Jcf "../""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" .
+# link deb file
+if [ -e "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON""_all.deb" ] && [ -L "../$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON""_all.deb" ]
+then
+  rm -f ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISON"_all.deb
+elif [ -e "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON""_all.deb" ] && [ ! -L "../$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON""_all.deb" ]
+then
+  echo "Destination .deb exists and is not a symbolic link! Terminating!" >&2
+  exit 1
+fi
 
-# Merge all files into a patch.
-#if [ -d "debian/patches/" ]
-#then
-#  rm -rf debian/patches/
-#fi
+# link dsc file
+if [ -e "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON"".dsc" ] && [ -L "../$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON"".dsc" ]
+then
+  rm -f ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISON".dsc
+elif [ -e "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON"".dsc" ] && [ ! -L "../$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON"".dsc" ]
+then
+  echo "Destination .dsc exists and is not a symbolic link! Terminating!" >&2
+  exit 1
+fi
 
-#dpkg-source --commit ./ upstream
+# link debian.tar.xz file
+if [ -e "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON"".debian.tar.xz" ] && [ -L "../$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON"".debian.tar.xz" ]
+then
+  rm -f ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISON".debian.tar.xz
+elif [ -e "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON"".debian.tar.xz" ] && [ ! -L "../$PACKAGE""_""$UPSTREAMVERSION""-""$REVISON"".debian.tar.xz" ]
+then
+  echo "Destination .debian.tar.xz exists and is not a symbolic link! Terminating!" >&2
+  exit 1
+fi
 
-# Whitelist all
-#echo > ./debian/source/include-binaries
-#find -type f -not -path "./debian/*" -not -path "./git/*" -not -path "./gitignore" -exec $(which bash) -c "echo {} >> debian/source/include-binaries" \;
-#sed -i "s/^\.\///g" debian/source/include-binaries
+
+
+# make package directory
+if [ ! -e "../$PACKAGE/$UPSTREAMVERSION/$REVISION" ]
+then
+  mkdir -pv ../"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"
+fi
+
+# create desitionations
+if [ ! -e "../""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" ]
+then
+  touch ../"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz
+fi
+
+if [ ! -e "../""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ]
+then
+  touch ../"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
+fi
+
+if [ ! -e "../""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISION"".dsc" ]
+then
+  touch ../"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".dsc
+fi
+
+if [ ! -e "../""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISION"".debian.tar.xz" ]
+then
+  touch ../"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".debian.tar.xz
+fi
+
+
+# link destinations
+ln -sfv ../"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz ../"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz
+ln -sfv ../"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISON"_all.deb ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISON"_all.deb
+ln -sfv ../"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISON".dsc ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISON".dsc
+ln -sfv ../"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISON".dsc ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISON".debian.tar.xz
+
+for in $1
+do
+  # link deb file
+  if [ -e "../""$i""_""$UPSTREAMVERSION""-""$REVISON""_all.deb" ] && [ -L "../$i""_""$UPSTREAMVERSION""-""$REVISON""_all.deb" ]
+  then
+    rm -f ../"$i"_"$UPSTREAMVERSION"-"$REVISON"_all.deb
+  elif [ -e "../""$i""_""$UPSTREAMVERSION""-""$REVISON""_all.deb" ] && [ ! -L "../$i""_""$UPSTREAMVERSION""-""$REVISON""_all.deb" ]
+  then
+    echo "Destination .deb exists and is not a symbolic link! Terminating!" >&2
+    exit 1
+  fi
+
+  if [ ! -e "../""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$i""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ]
+  then
+    touch ../"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
+  fi
+
+  ln -sfv ../"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$i"_"$UPSTREAMVERSION"-"$REVISON"_all.deb ../"$i"_"$UPSTREAMVERSION"-"$REVISON"_all.deb
+done
+
+tar --exclude="./debian/" --exclude="./git/" --exclude="./.gitignore" -Jcf ../"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz .
 
 dpkg-buildpackage
-
-# hard reset patch counter
-#rm -rf .pc/
