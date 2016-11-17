@@ -82,11 +82,11 @@ fi
 
 # link destinations
 ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz ../"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz
-ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISiON"_all.deb ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISiON"_all.deb
-ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISiON".dsc ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISiON".dsc
-ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISiON".dsc ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISiON".debian.tar.xz
+ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION"_all.deb ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
+ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".dsc ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".dsc
+ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".dsc ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".debian.tar.xz
 
-for in $1
+for i in $1
 do
   # link deb file
   if [ -e "../""$i""_""$UPSTREAMVERSION""-""$REVISiON""_all.deb" ] && [ -L "../$i""_""$UPSTREAMVERSION""-""$REVISiON""_all.deb" ]
