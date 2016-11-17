@@ -86,7 +86,7 @@ ln -sfv ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UP
 ln -sfv ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".dsc ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".dsc
 ln -sfv ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".dsc ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".debian.tar.xz
 
-for i in $1
+for i in $ADDTIONALBINARYPACKAGES
 do
   # link deb file
   if [ -e "../""$i""_""$UPSTREAMVERSION""-""$REVISiON""_all.deb" ] && [ -L "../$i""_""$UPSTREAMVERSION""-""$REVISiON""_all.deb" ]
@@ -106,6 +106,13 @@ do
   ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$i"_"$UPSTREAMVERSION"-"$REVISiON"_all.deb ../"$i"_"$UPSTREAMVERSION"-"$REVISiON"_all.deb
 done
 
-tar --exclude="./debian/" --exclude="./git/" --exclude="./.gitignore" -Jcf ../package-pool/"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz .
+tar --exclude="./debian/" --exclude="./git/" --exclude="./.gitignore" -Jcf ../"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz .
 
 dpkg-buildpackage
+
+# remove links
+rm -f ../"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz
+rm -f ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
+rm -f ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".dsc
+rm -f ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".debian.tar.xz
+
