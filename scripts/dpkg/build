@@ -89,7 +89,7 @@ ln -sfv ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UP
 for i in $ADDITIONALBINARYPACKAGES
 do
   # link deb file
-  if [ -e "../""$i""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ] && [ -L "../$i""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ]
+  if [ -e "../""$i""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ] && [ -L "../""$i""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ]
   then
     rm -f ../"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
   elif [ -e "../""$i""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ] && [ ! -L "../$i""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ]
@@ -103,7 +103,7 @@ do
     touch ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
   fi
 
-  ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb ../"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
+  ln -sfv ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb ../"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
 done
 
 tar --exclude="./.gitignore" --exclude="./.git" --exclude="./debian" -Jcf ../"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz .
