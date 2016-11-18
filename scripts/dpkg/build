@@ -100,10 +100,10 @@ do
 
   if [ ! -e "../package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$i""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ]
   then
-    touch ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
+    touch ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
   fi
 
-  ln -sfv ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb ../"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
+  ln -sfv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb ../"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
 done
 
 tar --exclude="./.gitignore" --exclude="./.git" --exclude="./debian" -Jcf ../"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz .
@@ -116,3 +116,7 @@ rm -f ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
 rm -f ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".dsc
 rm -f ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".debian.tar.xz
 
+for i in $ADDITIONALBINARYPACKAGES
+do
+  rm -f ../"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
+done
