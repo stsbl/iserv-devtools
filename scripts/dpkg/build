@@ -3,7 +3,7 @@
 export LC_ALL=C
 export EDITOR=$(which dummy-editor)
 
-ADDITIONALBINARYPACKAGES=$1
+ADDITIONALBINARYPACKAGES=$(pcregrep "^Package: (.*)$" debian/control | awk '{ print $2 }')
 VERSIONSTRING=$(pcregrep -M "^(.*) \((.*)\) (.*); urgency=(.*)$" debian/changelog | head -n 1)
 PACKAGE=$(echo $VERSIONSTRING | awk '{ print $1 }')
 VERSION=$(echo $VERSIONSTRING | awk '{ print $2 }' | replace '(' '' | replace ')' '')
@@ -88,22 +88,25 @@ ln -sfv ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UP
 
 for i in $ADDITIONALBINARYPACKAGES
 do
-  # link deb file
-  if [ -e "../""$i""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ] && [ -L "../""$i""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ]
+  if [ "$i" !== "$PACKAGE" ]
   then
-    rm -f ../"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
-  elif [ -e "../""$i""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ] && [ ! -L "../$i""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ]
-  then
-    echo "Destination .deb exists and is not a symbolic link! Terminating!" >&2
-    exit 1
-  fi
+    # link deb file
+    if [ -e "../""$i""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ] && [ -L "../""$i""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ]
+    then
+      rm -f ../"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
+    elif [ -e "../""$i""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ] && [ ! -L "../$i""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ]
+    then
+      echo "Destination .deb exists and is not a symbolic link! Terminating!" >&2
+      exit 1
+    fi
 
-  if [ ! -e "../package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$i""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ]
-  then
-    touch ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
-  fi
+    if [ ! -e "../package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$i""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ]
+    then
+      touch ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
+    fi
 
-  ln -sfv ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb ../"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
+    ln -sfv ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb ../"$i"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
+  fi
 done
 
 tar --exclude="./.gitignore" --exclude="./.git" --exclude="./debian" -Jcf ../"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz .
