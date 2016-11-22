@@ -12,3 +12,4 @@ cp -rv lib/* /usr/lib/iserv/
 cp -rv bin/* /usr/bin/
 cp -rv sbin/* /usr/sbin/
 cp -rv roles/* /usr/share/iserv/roles/
+cp -rv db/* /usr/share/iserv/db/
