@@ -11,10 +11,10 @@ fi
 
 if [ -e "/srv/deploy/install/$pkgID/data/" ]
 then
-  cp -rv "/srv/deploy/install/$pkgID/data/*" data/
+  cp -rv "/srv/deploy/install/$pkgID/data/"* data/
 fi
 
-if [ -e "data/*" ]
+if [[ -e "data/"* ]]
 then
   for i in data/*
   do
