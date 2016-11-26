@@ -14,7 +14,8 @@ then
   cp -rv "/srv/deploy/install/$pkgID/data/"* data/
 fi
 
-if [[ -e "data/"* ]]
+DataFiles=(data/*)
+if [ ${#DataFiles[@]} -gt 0 ]
 then
   for i in data/*
   do
