@@ -6,7 +6,7 @@ pkgID=$(basename $PWD | sed -e 's/winst-//g')
 
 if [ -e "/srv/deploy/install/$pkgID/" ]
 then
-  cp -v "/srv/deploy/install/$pkgID/{*.*,control}" winst/
+  cp -v "/srv/deploy/install/$pkgID/"{*.*,control} winst/
 fi
 
 if [ -e "/srv/deploy/install/$pkgID/data/" ]
