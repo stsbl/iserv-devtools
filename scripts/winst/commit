@@ -11,5 +11,16 @@ fi
 
 if [ -e "/srv/deploy/install/$pkgID/data/" ]
 then
-  cp -rv "/srv/deploy/install/$pkgID/winst/" data/
+  cp -rv "/srv/deploy/install/$pkgID/data/*" data/
+fi
+
+if [ -e "data/*" ]
+then
+  for i in data/*
+  do
+    if ! [ -e "/srv/deploy/install/$pkgID/data/$(basename $i)" ]
+    then
+      rm -f "$i"
+    fi
+  done
 fi
