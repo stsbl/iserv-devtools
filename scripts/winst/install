@@ -9,7 +9,7 @@ then
   mkdir -pv "/srv/deploy/install/$pkgID/"
 fi
 
-if [ -e "$PWD/data" ] && [ -e "/srv/deploy/install/$pkgID/data/" ]
+if [ -e "$PWD/data" ] && [ ! -e "/srv/deploy/install/$pkgID/data/" ]
 then
   mkdir -pv "/srv/deploy/install/$pkgID/data/"
 fi
