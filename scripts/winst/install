@@ -14,9 +14,9 @@ then
   mkdir -pv "/srv/deploy/install/$pkgID/data/"
 fi
 
-cp -rv winst/* /srv/deploy/install/$pkgID
+cp --preserve=timestamps -rv winst/* /srv/deploy/install/$pkgID
 
 if [ -e "$PWD/data/" ]
 then
-  cp -rv data/* /srv/deploy/install/$pkgID/data/
+  cp --preserve=timestamps -rv data/* /srv/deploy/install/$pkgID/data/
 fi

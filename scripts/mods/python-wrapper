@@ -18,4 +18,4 @@ then
   dir="$4""$dir"
 fi
 
-cp -v /usr/share/iserv/$dir $2".collect"/$6$origdir
+cp --preserve=timestamps -v /usr/share/iserv/$dir $2".collect"/$6$origdir
