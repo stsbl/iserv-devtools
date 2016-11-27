@@ -15,6 +15,7 @@ then
 fi
 
 cp --preserve=timestamps -rv winst/* /srv/deploy/install/$pkgID
+cp --preserve=timestamps -v debian/changelog /srv/deploy/install/$pkgID
 
 if [ -e "$PWD/data/" ]
 then

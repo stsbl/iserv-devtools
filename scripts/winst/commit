@@ -7,6 +7,7 @@ pkgID=$(basename $PWD | sed -e 's/winst-//g')
 if [ -e "/srv/deploy/install/$pkgID/" ]
 then
   cp --preserve=timestamps -v "/srv/deploy/install/$pkgID/"{*.*,control} winst/
+  cp --preserve=timestamps -v "/srv/deploy/install/$pkgID/changelog" debian/changelog
 fi
 
 if [ -e "/srv/deploy/install/$pkgID/data/" ]
