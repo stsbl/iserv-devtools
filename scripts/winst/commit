@@ -9,7 +9,7 @@ then
   cp --preserve=timestamps -v "/srv/deploy/install/$pkgID/"{*.*,control} winst/
   cp --preserve=timestamps -v "/srv/deploy/install/$pkgID/changelog" debian/changelog
   # copy back all other other subfolders in the package directory, assuming that there are part of the winst files
-  find "/srv/deploy/install/$pkgID/" -mindepth 1 -maxdepth 1 -type d ! -name "data" -exec cp --preserve=timestamps -v {} winst/ \;
+  find "/srv/deploy/install/$pkgID/" -mindepth 1 -maxdepth 1 -type d ! -name "data" -exec cp --preserve=timestamps -rv {} winst/ \;
 fi
 
 if [ -e "/srv/deploy/install/$pkgID/data/" ]
