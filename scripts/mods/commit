@@ -3,7 +3,7 @@
 export LC_ALL=C
 helper=$(which stsbl-dev-python-helper)
 
-for i in lib iconf src priv share config sbin bin iservchk roles appdata
+for i in db lib iconf src priv share config sbin bin iservchk roles appdata
 do
   if [ ! -e "$PWD/$i/" ]
   then
