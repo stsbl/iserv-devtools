@@ -6,7 +6,7 @@ export EDITOR=$(which dummy-editor)
 ADDITIONALBINARYPACKAGES=$(pcregrep "^Package: (.*)$" debian/control | awk '{ print $2 }')
 VERSIONSTRING=$(pcregrep -M "^(.*) \((.*)\) (.*); urgency=(.*)$" debian/changelog | head -n 1)
 PACKAGE=$(echo $VERSIONSTRING | awk '{ print $1 }')
-VERSION=$(echo $VERSIONSTRING | awk '{ print $2 }' | replace '(' '' | replace ')' '')
+VERSION=$(echo $VERSIONSTRING | awk '{ print $2 }' | sed 's/\\(//g' | sed 's/\\)//g')
 UPSTREAMVERSION=${VERSION%-*}
 REVISION=${VERSION#*-}
 
