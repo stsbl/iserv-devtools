@@ -11,21 +11,25 @@ then
   exit 1
 fi
 
-if [ "$#" -gt "3" ]
-then 
-  SINCE="$4" 
+if [ "$#" -gt "1" ]
+then
+  Urgency="$2"
 else
-  SINCE=""
-fi;
+  Urgency="medium"
+fi
 
-gbp dch -U $(if [ "$#" -gt "1" ]; then echo $2; else echo "medium"; fi) -D experimental --full -R -N $1 --since "$(if [ "$SINCE" = "" ]; then git log --all | grep -B 4 -m 1 -i "Update changelog" | head -n 1 | awk '{ print $2 }'; else echo $SINCE; fi;)"
+if [ "$#" -gt "2" ] && [ ! -z "$3" ]
+then
+  Since="$3"
+else
+  Since=$(git log --all | grep -B 4 -m 1 -i "Update changelog" | head -n 1 | awk '{ print $2 }')
+fi
+
+gbp dch -U "$Urgency" -D experimental --full --git-author -R -N "$1" --since "$Since"
 
 # replace maintainer
-Maintainer=($CONFIGDIRPREFIX/etc/stsbl/repository/package-maintainer)
-sed -i "s/-- $DEBFULLNAME <$DEBEMAIL>/-- $Maintainer/g" debian/changelog
-
-if [ "$#" -gt "2" ]
-then
+Maintainer=$(cat "$CONFIGDIRPREFIX"/etc/stsbl/repository/maintainer)
+sed -i "s/-- $(echo $DEBFULLNAME) <$(echo $DEBEMAIL)>/-- $(echo $Maintainer)/g" debian/changelog
 
 git add debian/changelog
 git commit -m "Update changelog for $1 release."
