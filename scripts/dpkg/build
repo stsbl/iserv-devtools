@@ -10,16 +10,6 @@ VERSION=$(echo $VERSIONSTRING | awk '{ print $2 }' | sed 's/\\(//g' | sed 's/\\)
 UPSTREAMVERSION=${VERSION%-*}
 REVISION=${VERSION#*-}
 
-# create pseudo orig archive to prevent dpkg abort on debian systems
-if [ -e "../""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" ] && [ -L "../""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" ]
-then
-  rm -f ../"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz
-elif [ -e "../""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" ] && [ ! -L "../""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" ]
-then
-  echo "Destination .orig.tar.xz exists and is not a symbolic link! Terminating!" >&2
-  exit 1
-fi
-
 # link deb file
 if [ -e "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ] && [ -L "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ]
 then
@@ -30,63 +20,19 @@ then
   exit 1
 fi
 
-# link dsc file
-if [ -e "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISION"".dsc" ] && [ -L "../$PACKAGE""_""$UPSTREAMVERSION""-""$REVISION"".dsc" ]
-then
-  rm -f ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".dsc
-elif [ -e "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISION"".dsc" ] && [ ! -L "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISION"".dsc" ]
-then
-  echo "Destination .dsc exists and is not a symbolic link! Terminating!" >&2
-  exit 1
-fi
-
-# link debian.tar.xz file
-if [ -e "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISION"".debian.tar.xz" ] && [ -L "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISION"".debian.tar.xz" ]
-then
-  rm -f ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".debian.tar.xz
-elif [ -e "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISION"".debian.tar.xz" ] && [ ! -L "../""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISION"".debian.tar.xz" ]
-then
-  echo "Destination .debian.tar.xz exists and is not a symbolic link! Terminating!" >&2
-  exit 1
-fi
-
-
-
-# make package directory
 if [ ! -e "../$PACKAGE/$UPSTREAMVERSION/$REVISION" ]
 then
   mkdir -pv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"
 fi
 
-# create desitionations
-if [ ! -e "../package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$PACKAGE""_""$UPSTREAMVERSION"".orig.tar.xz" ]
-then
-  touch ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz
-fi
-
+# create destionations
 if [ ! -e "../package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISION""_all.deb" ]
 then
   touch ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
 fi
 
-if [ ! -e "../package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISION"".dsc" ]
-then
-  touch ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".dsc
-fi
-
-if [ ! -e "../package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$PACKAGE""_""$UPSTREAMVERSION""-""$REVISION"".debian.tar.xz" ]
-then
-  touch ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".debian.tar.xz
-fi
-
-
 # link destinations
-ln -sfv ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz ../"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz
 ln -sfv ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION"_all.deb ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
-ln -sfv ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".dsc ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".dsc
-ln -sfv ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".debian.tar.xz ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".debian.tar.xz
-
-for i in $ADDITIONALBINARYPACKAGES
 do
   if ! [ "$i" = "$PACKAGE" ]
   then
@@ -109,15 +55,10 @@ do
   fi
 done
 
-tar --exclude="./.gitignore" --exclude="./.git" --exclude="./debian" -Jcf ../"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz .
-
-dpkg-buildpackage
+dpkg-buildpackage -b
 
 # remove links
-rm -f ../"$PACKAGE"_"$UPSTREAMVERSION".orig.tar.xz
 rm -f ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
-rm -f ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".dsc
-rm -f ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION".debian.tar.xz
 
 for i in $ADDITIONALBINARYPACKAGES
 do
