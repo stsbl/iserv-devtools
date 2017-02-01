@@ -6,7 +6,7 @@ export EDITOR=$(which dummy-editor)
 ADDITIONALBINARYPACKAGES=$(pcregrep "^Package: (.*)$" debian/control | awk '{ print $2 }')
 VERSIONSTRING=$(pcregrep -M "^(.*) \((.*)\) (.*); urgency=(.*)$" debian/changelog | head -n 1)
 PACKAGE=$(echo $VERSIONSTRING | awk '{ print $1 }')
-VERSION=$(echo $VERSIONSTRING | awk '{ print $2 }' | sed 's/\\(//g' | sed 's/\\)//g')
+VERSION=$(echo $VERSIONSTRING | awk '{ print $2 }' | sed 's/(//g' | sed 's/)//g')
 UPSTREAMVERSION=${VERSION%-*}
 REVISION=${VERSION#*-}
 
@@ -33,6 +33,8 @@ fi
 
 # link destinations
 ln -sfv ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION"_all.deb ../"$PACKAGE"_"$UPSTREAMVERSION"-"$REVISION"_all.deb
+
+for i in $ADDTIONALBINARYPACKAGES
 do
   if ! [ "$i" = "$PACKAGE" ]
   then
