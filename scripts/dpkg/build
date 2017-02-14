@@ -3,17 +3,19 @@
 export LC_ALL=C
 export EDITOR=$(which dummy-editor)
 
-ADDITIONALBINARYPACKAGES=$(pcregrep "^Package: (.*)$" debian/control | awk '{ print $2 }')
+ADDITIONALBINARYPACKAGES=$(pcregrep "^Package: (.*)$" debian/control | awk '{ print $2 }' | sed ':a;N;$!ba;s/\n/ /g')
 VERSIONSTRING=$(pcregrep -M "^(.*) \((.*)\) (.*); urgency=(.*)$" debian/changelog | head -n 1)
 PACKAGE=$(echo $VERSIONSTRING | awk '{ print $1 }')
 VERSION=$(echo $VERSIONSTRING | awk '{ print $2 }' | sed 's/(//g' | sed 's/)//g')
 UPSTREAMVERSION=${VERSION%-*}
 
-if [ $1 = "--native" ] || [ "$1" = "-n" ]
+if [ "$1" = "--native" ] || [ "$1" = "-n" ]
 then
   REVISION=
+  PLAINREVISION=
 else
   REVISION="-"${VERSION#*-}
+  PLAINREVISION=${VERSION#*-}
 fi
 
 # link deb file
@@ -26,21 +28,21 @@ then
   exit 1
 fi
 
-if [ ! -e "../$PACKAGE/$UPSTREAMVERSION/$REVISION" ]
+if [ ! -e "../$PACKAGE/$UPSTREAMVERSION/$PLAINREVISION" ]
 then
-  mkdir -pv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"
+  mkdir -pv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"
 fi
 
 # create destionations
-if [ ! -e "../package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$PACKAGE""_""$UPSTREAMVERSION""$REVISION""_all.deb" ]
+if [ ! -e "../package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$PLAINREVISION""/""$PACKAGE""_""$UPSTREAMVERSION""$REVISION""_all.deb" ]
 then
-  touch ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb
+  touch ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb
 fi
 
 # link destinations
-ln -sfv ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb ../"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb
+ln -sfv ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb ../"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb
 
-for i in $ADDTIONALBINARYPACKAGES
+for i in $ADDITIONALBINARYPACKAGES
 do
   if ! [ "$i" = "$PACKAGE" ]
   then
@@ -54,12 +56,12 @@ do
       exit 1
     fi
 
-    if [ ! -e "../package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$REVISION""/""$i""_""$UPSTREAMVERSION""$REVISION""_all.deb" ]
+    if [ ! -e "../package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$PLAINREVISION""/""$i""_""$UPSTREAMVERSION""$REVISION""_all.deb" ]
     then
-      touch ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb
+      touch ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb
     fi
 
-    ln -sfv ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$REVISION"/"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb ../"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb
+    ln -sfv ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb ../"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb
   fi
 done
 
