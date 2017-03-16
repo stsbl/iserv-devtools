@@ -1,23 +1,82 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 export LC_ALL=C
 
-pkgID=$(basename $PWD | sed -e 's/winst-//g')
-
-if [ ! -e "/srv/deploy/install/$pkgID/" ]
+if [ -f "$PWD/.winstsubdirs" ]
 then
-  mkdir -pv "/srv/deploy/install/$pkgID/"
-fi
+  Subdirs=$(cat "$PWD/.winstsubdirs")
+  for i in $Subdirs
+  do
+    if [ "$i" = "common" ]
+    then
+      echo "Warning: common is a reserved keyword! Usement in .winstsubdirs is prohibited!"
+      continue
+    fi
 
-if [ -e "$PWD/data" ] && [ ! -e "/srv/deploy/install/$pkgID/data/" ]
-then
-  mkdir -pv "/srv/deploy/install/$pkgID/data/"
-fi
+    if [ ! -d "$PWD/winst/$i" ]
+    then
+      echo "Warning: Specified winst sub directory is missing!"
+      continue
+    fi
 
-cp --preserve=timestamps -rv winst/* /srv/deploy/install/$pkgID
-cp --preserve=timestamps -v debian/changelog /srv/deploy/install/$pkgID
+    if [ ! -f "$PWD/winst/$i/control" ]
+    then
+      echo "Warning: Control file missing! Wrong directory specified?"
+      continue
+    fi
 
-if [ -e "$PWD/data/" ]
-then
-  cp --preserve=timestamps -rv data/* /srv/deploy/install/$pkgID/data/
+    pkgID=$(awk '/^id: / { print $2 }' "$PWD"/winst/"$i"/control)
+
+    if [ ! -e "/srv/deploy/install/$pkgID/" ]
+    then
+      mkdir -pv "/srv/deploy/install/$pkgID/"
+    fi
+	      
+    cp --preserve=timestamps -rv winst/"$i"/* /srv/deploy/install/"$pkgID"/
+    if [ -d "$PWD/winst/common" ]
+    then
+      cp --preserve=timestamps -rv winst/common/* /srv/deploy/install/"$pkgID"/
+    fi
+
+    if [ -d "$PWD/data/$i" ]
+    then
+      if [ ! -e "/srv/deploy/install/$pkgID/data" ]
+      then
+        mkdir -pv "/srv/deploy/install/$pkgID/data"
+      fi
+      cp --preserve=timestamps -rv data/"$i"/* /srv/deploy/install/"$pkgID"/data/
+    fi
+
+    if [ -d "$PWD/data/common" ]
+    then
+      cp --preserve=timestamps -rv data/common/* /srv/deploy/install/"$pkgID"/data/
+    fi
+
+    if [ -f "$PWD/debian/winst-$pkgID"".winst.changelog" ]
+    then
+      cp --preserve=timestamps -v "debian/winst-$pkgID"".winst.changelog" "/srv/deploy/install/$pkgID/changelog"
+    else
+      echo "Warning: No changelog for $pkgID in source tree! You may create it in /srv/deploy/ after copying!"
+    fi
+  done
+else
+  pkgID=$(basename $PWD | sed -e 's/winst-//g')
+
+  if [ ! -e "/srv/deploy/install/$pkgID/" ]
+  then
+    mkdir -pv "/srv/deploy/install/$pkgID/"
+  fi
+
+  if [ -e "$PWD/data" ] && [ ! -e "/srv/deploy/install/$pkgID/data/" ]
+  then
+    mkdir -pv "/srv/deploy/install/$pkgID/data/"
+  fi
+
+  cp --preserve=timestamps -rv winst/* /srv/deploy/install/$pkgID
+  cp --preserve=timestamps -v debian/changelog /srv/deploy/install/$pkgID
+
+  if [ -e "$PWD/data/" ]
+  then
+    cp --preserve=timestamps -rv data/* /srv/deploy/install/$pkgID/data/
+  fi
 fi
