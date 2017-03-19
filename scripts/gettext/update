@@ -1,0 +1,172 @@
+#!/bin/bash
+set -e
+shopt -s nullglob
+
+if [ -z "$1" ]
+then
+  echo "Usage: $0 <package>" >&2
+  exit 1
+fi
+
+if [ -z "$ISERV_GIT_BASE" ]
+then
+  if [ -d ~/git ]
+  then
+    ISERV_GIT_BASE=~/git
+  elif [ -d /var/cache/iserv/build ]
+  then
+    ISERV_GIT_BASE=/var/cache/iserv/build
+  fi
+fi
+
+if [ -z "$ISERV_GIT_BASE" ]
+then
+  echo "Could not find IServ Git directory" >&2
+  exit 1
+fi
+
+PKG="$1"
+NAME="$(echo "$PKG" | sed 's/^stsbl-iserv-//')"
+SRCDIR="$ISERV_GIT_BASE/$PKG"
+BUNDLES=()
+for BUNDLE in $SRCDIR/src/*/*Bundle
+do
+  BUNDLES+=($(basename $BUNDLE))
+done
+if [ -z "$DESTDIR" ]
+then
+  DESTDIR=/var/lib/translations/po/iserv3
+fi
+YEAR="$(date +'%Y')"
+
+cd $SRCDIR
+
+# Extract PHP/JS to messages/js.pot
+rm -f "$DESTDIR/templates/$NAME"{-js,}".pot"
+TWIG_CACHE=()
+for BUNDLE in "${BUNDLES[@]}"
+do
+  TMP="/tmp/$NAME-Stsbl$BUNDLE.twig.php"
+  symfony iserv:dev:twig2php Stsbl"$BUNDLE" "$TMP"
+  TWIG_CACHE+=("$TMP")
+done
+find . -regextype posix-extended -regex '.*\.(php|mod)$' -type f -exec xgettext --copyright-holder="Stadtteilschule Blankenese" --package-name="$PKG" --language PHP --from-code=utf-8 -k_n:1,2 -kpgettext:1c,2 -k_p:1c,2 -k_np:1c,2,3 -knpgettext:1c,2,3 -k__:1 -k__n:1,2 -k__p:1c,2 -k__np:1c,2,3 -o "$DESTDIR/templates/$NAME.pot" "${TWIG_CACHE[@]}" {} +
+find . -name "*.js" -type f -exec xgettext --copyright-holder="Stadtteilschule Blankenese" --package-name="$PKG" --language JavaScript --from-code=utf-8 -k_ -k_p:1c,2 -k__ -k__p:1c,2 -o "$DESTDIR/templates/$NAME-js.pot" {} +
+rm -f "${TWIG_CACHE[@]}"
+
+# Set some HEADERs
+for pot in "$DESTDIR/templates/$NAME.pot" "$DESTDIR/templates/$NAME-js.pot"
+do
+  if [ -f "$pot" ]
+  then
+    sed -i "
+      s/SOME DESCRIPTIVE TITLE/TRANSLATION CATALOG OF ${PKG^^}/;
+      s/YEAR Stadtteilschule Blankenese/$YEAR Stadtteilschule Blankenese/;
+      s/# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR./# Stadtteilschule Blankenese <repository@stsbl.de>, $YEAR./;
+      s/PACKAGE/${PKG}/;
+      s/CHARSET/UTF-8/
+      " "$pot"
+  fi
+done
+
+SHA512=$(for i in "$DESTDIR/templates/$NAME"{-js,}".pot"; do [ -r $i ] &&\
+  cat $i; done | sed '/^"POT-Creation-Date: /d' | sha512sum | sed 's/\s.*$//')
+
+#if [ -d /var/lib/translations ] && ([ ! -f /var/cache/iserv/devgettext/"$PKG".sha512 ] \
+#  || [ "$(</var/cache/iserv/devgettext/"$PKG".sha512)" != "$SHA512" ])
+#then
+#  echo -n 'Updating translations'
+#  sudo -u pootle -- bash -c ". ~/bin/activate && ~/refresh.sh 2>/dev/null"
+#  echo '.'
+#fi
+
+if [ ! -d /var/cache/iserv/devgettext ]
+then
+  mkdir -m 2775 -p /var/cache/iserv/devgettext
+  chgrp git /var/cache/iserv/devgettext
+fi
+echo "$SHA512" > /var/cache/iserv/devgettext/"$PKG".sha512
+
+for LANG in "de"
+do
+  LEGACYDIR="/usr/share/iserv/locale"
+  LEGACY=""
+  JSLEGACY=""
+  INSTDIR="$ISERV_GIT_BASE/$PKG/share/locale"
+  
+  # reuse locales from IServ Portal
+  if [ -f "$LEGACYDIR/$LANG/portal.po" ]
+  then
+    LEGACY+=" -C $LEGACYDIR/$LANG/portal.po"
+  fi
+  #if [ -f "$LEGACYDIR/$LANG/$NAME.po" ]
+  #then
+  #  LEGACY="$LEGACY -C $LEGACYDIR/$LANG/$NAME.po"
+  #fi
+ 
+  # reuse locales from IServ Core
+  ISERVCORELOCALES=$(dpkg -L iserv3-crud iserv3-addressbook iserv3-admin iserv3-config \
+    iserv3-file iserv3-host iserv3-mail iserv3-package iserv3-api iserv3-crud \
+    iserv3-vendor | grep -E "^/usr/share/iserv/locale/$LANG/(.*).po$" | grep -v 'js3')
+  
+  # reuse locales for JS from IServ Core
+  ISERVCOREJSLOCALES=$(dpkg -L iserv3-crud iserv3-addressbook iserv3-admin iserv3-config \
+    iserv3-file iserv3-host iserv3-mail iserv3-package iserv3-api iserv3-crud \
+    iserv3-vendor | grep -E "^/usr/share/iserv/locale/$LANG/(.*)-js3.po$")
+   
+  for PO in $ISERVCORELOCALES
+  do
+    LEGACY+=" -C $PO"
+  done
+  
+  for PO in $ISERVCOREJSLOCALES
+  do
+    JSLEGACY+=" -C $PO"
+  done
+
+  if [ ! -d "$DESTDIR/$LANG/" ]
+  then
+    mkdir -p "$DESTDIR/$LANG/"
+  fi
+
+  if [ ! -f "$DESTDIR/$LANG/$NAME.po" ]
+  then
+    if [ -f "$INSTDIR/$LANG/$NAME"".po" ]
+    then
+      cp "$INSTDIR/$LANG/$NAME"".po" "$DESTDIR/$LANG/$NAME"".po"
+    else
+      msginit --locale=$LANG --input "$DESTDIR/templates/$NAME.pot" --output "$DESTDIR/$LANG/$NAME.po"
+    fi
+  fi
+
+  # create output file or import it from git if available
+  if [ ! -f "$DESTDIR/$LANG/$NAME-js.po" ]
+  then
+    if [ -f "$INSTDIR/$LANG/$NAME""-js3.po" ]
+    then
+      cp "$INSTDIR/$LANG/$NAME""-js3.po" "$DESTDIR/$LANG/$NAME-js.po"
+    else
+      msginit --locale=$LANG --input "$DESTDIR/templates/$NAME-js.pot" --output "$DESTDIR/$LANG/$NAME-js.po"
+    fi
+  fi
+
+  if [ -f "$DESTDIR/$LANG/$NAME.po" ]
+  then
+    msgmerge -q$LEGACY -U -N "$DESTDIR/$LANG/$NAME.po" "$DESTDIR/templates/$NAME.pot"
+    cp "$DESTDIR/$LANG/$NAME.po" "$INSTDIR/$LANG/$NAME""3.po"
+  fi
+  if [ -f "$DESTDIR/$LANG/$NAME-js.po" ]
+  then
+    msgmerge -q$JSLEGACY -U -N "$DESTDIR/$LANG/$NAME-js.po" "$DESTDIR/templates/$NAME-js.pot"
+    cp "$DESTDIR/$LANG/$NAME-js.po" "$INSTDIR/$LANG/$NAME""-js3.po"
+  fi
+done
+
+## Create JSON from PO ($TARGET is now latest foo-js.po)
+# MOVED TO ISERVCHK TO GENERATE SINGLE FILE!
+#JSONDIR=/usr/share/iserv/web/js/lang
+#if [ ! -d "JSONDIR" ]
+#then
+#  mkdir $JSONDIR
+#fi
+#po2json $1TARGET $JSONDIR/$NAME.json --format=mf --fallback-to-msgid --pretty
