@@ -1,0 +1,16 @@
+#!/bin/sh
+
+if [ -z "$1" ]
+then
+  echo "Package is missing!" &>2
+  exit 1
+fi
+
+if [ -f "/var/lib/translations/po/iserv3/de/$1.po" ]
+then
+  stsbl-dev-gettext "stsbl-iserv-$1"
+  vim -p "/var/lib/translations/po/iserv3/de/$1.po"
+  stsbl-dev-gettext "stsbl-iserv-$1"
+else
+  echo "Invalid package name!" &>2
+fi
