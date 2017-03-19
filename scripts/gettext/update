@@ -4,7 +4,7 @@ shopt -s nullglob
 
 if [ -z "$1" ]
 then
-  echo "Usage: $0 <package>" >&2
+  echo "Usage: $0 <package>" 1>&2
   exit 1
 fi
 
@@ -21,7 +21,7 @@ fi
 
 if [ -z "$ISERV_GIT_BASE" ]
 then
-  echo "Could not find IServ Git directory" >&2
+  echo "Could not find IServ Git directory" 1>&2
   exit 1
 fi
 
@@ -150,12 +150,12 @@ do
     fi
   fi
 
-  if [ -f "$DESTDIR/$LANG/$NAME.po" ]
+  if [ -f "$DESTDIR/$LANG/$NAME.po" ] && [ -f "$DESTDIR/templates/$NAME.pot" ]
   then
     msgmerge -q$LEGACY -U -N "$DESTDIR/$LANG/$NAME.po" "$DESTDIR/templates/$NAME.pot"
     cp "$DESTDIR/$LANG/$NAME.po" "$INSTDIR/$LANG/$NAME""3.po"
   fi
-  if [ -f "$DESTDIR/$LANG/$NAME-js.po" ]
+  if [ -f "$DESTDIR/$LANG/$NAME-js.po" ] && [ -f "$DESTDIR/templates/$NAME.pot" ]
   then
     msgmerge -q$JSLEGACY -U -N "$DESTDIR/$LANG/$NAME-js.po" "$DESTDIR/templates/$NAME-js.pot"
     cp "$DESTDIR/$LANG/$NAME-js.po" "$INSTDIR/$LANG/$NAME""-js3.po"
