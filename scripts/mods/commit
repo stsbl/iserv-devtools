@@ -27,7 +27,7 @@ do
   elif [ "$i" = "lib" ] || [ "$i" = "sbin" ] || [ "$i" = "bin" ]
   then
     find $i/ -mindepth 1 -type d -exec mkdir -pv "$i.collect"/{} \;
-    find $i/ -mindepth 1 -type f -exec bash -ex -c 'subject={}; echo $subject; cp -v --preserve=timestamps "/usr/'$(path=$(echo $i | tr "/" "\n"); if [ "${path[0]}" = "lib" ]; then echo "lib/iserv"; else echo $i; fi)'/$(echo $subject | sed s/lib//g)" "'$i'.collect/'$i'/$(echo $(dirname {}) | sed s/lib//g)/"' \;
+    find $i/ -mindepth 1 -type f -exec bash -ex -c 'subject={}; echo $subject; cp -v --preserve=timestamps "/usr/'$(path=$(echo $i | tr "/" "\n"); if [ "${path[0]}" = "lib" ]; then echo "lib/iserv"; elif [ "${path[0]}" = "sbin" ]; then echo -n; elif [ "${path[0]}" = "bin" ]; then echo -n; else echo $i; fi)'/$(echo $subject | sed s/lib//g)" "'$i'.collect/'$i'/$(echo $(dirname {}) | sed s/lib//g | sed s/sbin//g | sed s/bin//g)"' \;
   elif [ "$i" = "appdata" ]
   then
     find $i/ -mindepth 1 -type d -exec mkdir -pv "$i.collect"/{} \;

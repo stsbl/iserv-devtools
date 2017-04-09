@@ -26,7 +26,13 @@ then
 fi
 
 PKG="$1"
-NAME="$(echo "$PKG" | sed 's/^stsbl-iserv-//')"
+if [[ $(echo "$PKG" | grep -E "^stsbl-iserv3-") ]]
+then
+  NAME="$(echo "$PKG" | sed 's/^stsbl-iserv3-//')"
+else
+  NAME="$(echo "$PKG" | sed 's/^stsbl-iserv-//')"
+fi
+
 SRCDIR="$ISERV_GIT_BASE/$PKG"
 BUNDLES=()
 for BUNDLE in $SRCDIR/src/*/*Bundle
@@ -99,16 +105,24 @@ do
   then
     LEGACY+=" -C $LEGACYDIR/$LANG/portal.po"
   fi
-  #if [ -f "$LEGACYDIR/$LANG/$NAME.po" ]
-  #then
-  #  LEGACY="$LEGACY -C $LEGACYDIR/$LANG/$NAME.po"
-  #fi
+  
+  # reuse locales from IServ 2 base package.
+  if [ -f "$LEGACYDIR/$LANG/$NAME.po" ]
+  then
+    LEGACY="$LEGACY -C $LEGACYDIR/$LANG/$NAME.po"
+  fi
  
   # reuse locales from IServ Core
   ISERVCORELOCALES=$(dpkg -L iserv3-crud iserv3-addressbook iserv3-admin iserv3-config \
     iserv3-file iserv3-host iserv3-mail iserv3-package iserv3-api iserv3-crud \
     iserv3-vendor | grep -E "^/usr/share/iserv/locale/$LANG/(.*).po$" | grep -v 'js3')
-  
+ 
+  # use custom parent locales if available
+  if [ -f "$DESTDIR/templates/$NAME"".parent" ]
+  then
+    . "$DESTDIR/templates/$NAME"".parent"
+  fi
+
   # reuse locales for JS from IServ Core
   ISERVCOREJSLOCALES=$(dpkg -L iserv3-crud iserv3-addressbook iserv3-admin iserv3-config \
     iserv3-file iserv3-host iserv3-mail iserv3-package iserv3-api iserv3-crud \
@@ -129,7 +143,7 @@ do
     mkdir -p "$DESTDIR/$LANG/"
   fi
 
-  if [ ! -f "$DESTDIR/$LANG/$NAME.po" ]
+  if [ ! -f "$DESTDIR/$LANG/$NAME.po" ] && [ -f "$DESTDIR/templates/$NAME.pot" ]
   then
     if [ -f "$INSTDIR/$LANG/$NAME"".po" ]
     then
@@ -140,7 +154,7 @@ do
   fi
 
   # create output file or import it from git if available
-  if [ ! -f "$DESTDIR/$LANG/$NAME-js.po" ]
+  if [ ! -f "$DESTDIR/$LANG/$NAME-js.po" ] && [ -f "$DESTDIR/templates/$NAME-js.pot" ]
   then
     if [ -f "$INSTDIR/$LANG/$NAME""-js3.po" ]
     then
