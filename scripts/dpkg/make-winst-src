@@ -1,0 +1,17 @@
+#!/bin/bash
+
+export DEBEMAIL=repository@stsbl.de
+export DEBFULLNAME=Stadtteilschule\ Blankenese
+
+if [ ! -f "winst/contol" ]
+then
+  echo -e "No control file found!\nWrong directory?" 1>&2
+  exit 1
+fi
+
+# extract version number
+VER=$(awk 'END { print ver "-" rel } \
+  /^version: / { ver = $2 } \
+  /^packageVersion: / { rel = $2 }' winst/control)
+
+dh_make -c mit -i -n -p $(basename $PWD)_$VER
