@@ -1,0 +1,32 @@
+#!/bin/bash
+
+export DEBEMAIL=repository@stsbl.de
+export DEBFULLNAME=Stadtteilschule\ Blankenese
+
+# sanity check
+if [ ! -f control ]
+then
+  echo "No control file found. Wrong directory?"
+  exit 1
+fi
+
+if file control | grep -q 'with CRLF line terminators'
+then
+  echo "control has CRLF line endings, fix this in vim with :set ff=unix!"
+  exit
+fi
+
+# extract package name
+PKG="winst-$(awk '/^id: / { print $2 }' control)"
+
+# extract version number
+VER=$(awk 'END { print ver "-" rel } \
+    /^version: / { ver = $2 } \
+    /^packageVersion: / { rel = $2 }' control)
+
+# create changelog
+if [ ! -f changelog ]; then
+  dch --create -c changelog -v "$VER" --package "$PKG" -D experimental --no-query -D experimental
+else
+  dch -c changelog -v "$VER" -D experimental
+fi

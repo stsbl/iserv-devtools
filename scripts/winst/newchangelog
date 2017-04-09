@@ -1,6 +1,0 @@
-#!/bin/sh
-
-export DEBEMAIL=repository@stsbl.de
-export DEBFULLNAME=Stadtteilschule\ Blankenese
-
-winst-newchangelog
