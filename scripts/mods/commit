@@ -1,21 +1,25 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 export LC_ALL=C
 helper=$(which stsbl-dev-python-helper)
 
-for i in db lib iconf src priv share config sbin bin iservchk roles appdata
+for i in usr db lib iconf src priv share config sbin bin iservchk roles appdata
 do
   if [ ! -e "$PWD/$i/" ]
   then
     continue
   fi
-
+  
   mkdir -pv "$i.collect/$i"
   
   if [ "$i" = "share" ]
   then
     find $i/ -mindepth 1 -type d -exec mkdir -pv "$i.collect"/{} \;
     find $i/ -mindepth 1 -type f -exec bash -c "file={}; $helper \${file/share\///} $i 'share/' '' '' 'share'" \;
+  elif [ "$i" = "usr" ]
+  then
+    find $i -mindepth 1 -type d | xargs -i mkdir -pv "$i.collect/{}"
+    find $i -mindepth 1 -type f | xargs -i cp --preserve=timestamps "/{}" "$i.collect/{}"  
   elif [ "$i" = "config" ]
   then
     find $i/ -mindepth 1 -type d -exec mkdir -pv "$i.collect"/{} \;
