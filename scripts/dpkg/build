@@ -3,19 +3,44 @@
 export LC_ALL=C
 export EDITOR=$(which dummy-editor)
 
+ISNATIVE=1
+ISWINST=1
+
+while getopts "hnw" option
+do
+  case $option in
+    (n) ISNATIVE=0;;
+    (w) ISWINST=0;;
+    (h) cat <<EOUSAGE ; exit 0;;
+Usage: $(basename $0) [options]
+Options
+  -n     build package with native version number
+  -w     build winst package
+  -h     show this help
+EOUSAGE
+  esac
+done
+
 ADDITIONALBINARYPACKAGES=$(pcregrep "^Package: (.*)$" debian/control | awk '{ print $2 }' | sed ':a;N;$!ba;s/\n/ /g')
 VERSIONSTRING=$(pcregrep -M "^(.*) \((.*)\) (.*); urgency=(.*)$" debian/changelog | head -n 1)
 PACKAGE=$(echo $VERSIONSTRING | awk '{ print $1 }')
 VERSION=$(echo $VERSIONSTRING | awk '{ print $2 }' | sed 's/(//g' | sed 's/)//g')
 UPSTREAMVERSION=${VERSION%-*}
 
-if [ "$1" = "--native" ] || [ "$1" = "-n" ]
+REVISION="-"${VERSION#*-}
+PLAINREVISION=${VERSION#*-}
+
+if [ $ISNATIVE = 0 ]
 then
   REVISION=
   PLAINREVISION=
-else
-  REVISION="-"${VERSION#*-}
-  PLAINREVISION=${VERSION#*-}
+fi
+
+if [ $ISWINST = 1 ]
+then
+  cp -a /usr/share/iserv/install debian/install
+  git add debian/install
+  git commit -m "Updated install file."
 fi
 
 # link deb file
