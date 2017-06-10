@@ -1,0 +1,17 @@
+#!/bin/bash -e
+
+if [ $# != 2 ]
+then
+  echo "usage: $(basename $0) package destination-dir"
+  exit 1
+fi
+
+IN="$1"
+DIR="$2"
+test -f "$IN"
+mkdir -p "$DIR"
+cat "$IN" | cpio -i --to-stdout --quiet OPSI.*.gz |
+gunzip | ( cd "$DIR" && cpio -i --quiet )
+cat "$IN" | cpio -i --to-stdout --quiet CLIENT_DATA.*.gz |
+gunzip | ( cd "$DIR" && cpio -i --quiet )
+
