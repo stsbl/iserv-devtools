@@ -35,14 +35,22 @@ fi
 
 SRCDIR="$ISERV_GIT_BASE/$PKG"
 BUNDLES=()
+TRANSLATIONSDIR=/var/lib/translations
+
 for BUNDLE in $SRCDIR/src/*/*Bundle
 do
   BUNDLES+=($(basename $BUNDLE))
 done
 if [ -z "$DESTDIR" ]
 then
-  DESTDIR=/var/lib/translations/po/iserv3
+  DESTDIR=$TRANSLATIONSDIR/po/iserv3
 fi
+
+if [ -z "$PARENTDIR" ]
+then
+  PARENTDIR=$TRANSLATIONSDIR/parents
+fi
+
 YEAR="$(date +'%Y')"
 
 cd $SRCDIR
@@ -107,9 +115,12 @@ do
   fi
   
   # reuse locales from IServ 2 base package.
-  if [ -f "$LEGACYDIR/$LANG/$NAME.po" ]
+  if [ -f "$PARENTDIR/$LANG/$NAME.po" ]
   then
-    LEGACY="$LEGACY -C $LEGACYDIR/$LANG/$NAME.po"
+    LEGACY+=" -C $PARENTDIR/$LANG/$NAME.po"
+  elif [ -f "$LEGACYDIR/$LANG/$NAME.po" ]
+  then
+    LEGACY+=" -C $LEGACYDIR/$LANG/$NAME.po"
   fi
  
   # reuse locales from IServ Core
