@@ -31,3 +31,6 @@ then
   echo "debian/files" >> .gitignore
   echo "debian/debhelper-build-stamp" >> .gitignore
 fi
+
+# apply rules file with dh_iserv3install
+cp -a /usr/share/iserv/dev/debian-rules.template debian/rules
