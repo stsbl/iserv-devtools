@@ -1,0 +1,30 @@
+#!/bin/bash -e
+
+usage() {
+  echo "Usage: $(basename $0) [BundleName] [BundleNamespace]"
+  echo
+  echo "BundleName is like StsblFooBundle"
+  echo "BundleNamespace is like Stsbl/FooBundle"
+}
+
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]
+then
+  usage
+  exit 0
+fi
+
+if [ -z "$1" ]
+then
+  usage >&2
+  exit 1
+fi
+
+if [ -z "$2" ]
+then
+  usage >&2
+  exit 1
+fi
+
+symfony generate:bundle --shared --format=yml --bundle-name=$BundleName --namespace=$Namespace --no-interaction
+aptitude reinstall iserv3-core
+iserv3chk

@@ -16,3 +16,4 @@ ln -sf $PWD/scripts/dpkg/make-winst-src /usr/local/sbin/stsbl-dev-dpkg-make-wins
 ln -sf $PWD/scripts/gettext/update /usr/local/bin/stsbl-dev-gettext
 ln -sf $PWD/scripts/gettext/edit-po /usr/local/bin/stsbl-dev-edit-po
 ln -sf $PWD/scripts/gettext/edit-js-po /usr/local/bin/stsbl-dev-edit-js-po
+ln -sf $PWD/scripts/mods/stsbl-dev-generate-bundle /usr/local/sbin/stsbl-dev-generate-bundle
