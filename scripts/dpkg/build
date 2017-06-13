@@ -40,7 +40,7 @@ if [ $ISWINST = 1 ]
 then
   cp -a /usr/share/iserv/install debian/install
   git add debian/install
-  git commit -m "Updated install file."
+  git commit -m "Updated install file." || true
 fi
 
 # link deb file
@@ -90,7 +90,7 @@ do
   fi
 done
 
-dpkg-buildpackage -b
+dpkg-buildpackage -b -us -uc
 
 # remove links
 rm -f ../"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb
