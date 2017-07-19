@@ -14,6 +14,7 @@ do
     (h) cat <<EOUSAGE ; exit 0;;
 Usage: $(basename $0) [options]
 Options
+  -p     prevent updating of install file
   -n     build package with native version number
   -w     build winst package
   -h     show this help
@@ -36,11 +37,11 @@ then
   PLAINREVISION=
 fi
 
-if [ $ISWINST = 1 ]
+if [ -f "/debian/install" ]
 then
-  cp -a /usr/share/iserv/install debian/install
-  git add debian/install
-  git commit -m "Updated install file." || true
+  rm -f /debian/install
+  git add .
+  git commit -m "Removed legacy install file."
 fi
 
 # link deb file
@@ -90,7 +91,8 @@ do
   fi
 done
 
-dpkg-buildpackage -b -us -uc
+dpkg-buildpackage -b
+lintian || true
 
 # remove links
 rm -f ../"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb
