@@ -25,6 +25,6 @@ then
   exit 1
 fi
 
-symfony generate:bundle --shared --format=yml --bundle-name=$BundleName --namespace=$Namespace --no-interaction
+symfony generate:bundle --shared --format=yml --bundle-name=$1 --namespace=$2 --no-interaction
 aptitude reinstall iserv3-core
 iserv3chk
