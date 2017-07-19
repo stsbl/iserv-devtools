@@ -30,6 +30,7 @@ then
   echo "debian/$(basename $PWD).debhelper.log" >> .gitignore
   echo "debian/files" >> .gitignore
   echo "debian/debhelper-build-stamp" >> .gitignore
+  echo "debian/*.debhelper" >> .gitignore
 fi
 
 # apply rules file with dh_iserv3install
