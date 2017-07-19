@@ -50,42 +50,44 @@ then
       
     if [ -d "/srv/deploy/install/$pkgID/data" ] && [ -d "$PWD/data" ]
     then
-      find /srv/deploy/install/"$pkgID"/data -type f -exec bash -e -c \
-        'CurrentFile={}
-         CurrentFile=${CurrentFile#/srv/deploy/install/'$pkgID'/data/}
-         if [ -f "data/common/$CurrentFile" ]
-         then
-           cp --preserve=timestamps -v {} data/common/$CurrentFile
-         else
-           cp --preserve=timestamps -v {} data/'"$i"'/$CurrentFile
-         fi' \;
-     fi
+      rsync -rtzv --delete --protect-args "/srv/deploy/install/$pkgID/data" "$PWD/data"
+    fi
   done
 else
   pkgID=$(basename $PWD | sed -e 's/winst-//g')
 
   if [ -e "/srv/deploy/install/$pkgID/" ]
   then
-    cp --preserve=timestamps -v "/srv/deploy/install/$pkgID/"{*.*,control} winst/
+    find /srv/deploy/install/"$pkgID" -type f -not -path "/srv/deploy/install/$pkgID/data/*" -not -path "/srv/deploy/install/$pkgID/changelog" -exec bash -e -c \
+      'CurrentFileFull={}
+       CurrentFile=${CurrentFileFull#/srv/deploy/install/'$pkgID'/}
+       if [ ! -d "$(dirname install/'$pkgID'/$CurrentFile)" ]
+       then
+         mkdir -pv "$(dirname install/'$pkgID'/$CurrentFile)"
+       fi
+       cp --preserve=timestamps -v $CurrentFileFull `dirname install/'$pkgID'/$CurrentFile`' \;
+
     cp --preserve=timestamps -v "/srv/deploy/install/$pkgID/changelog" debian/changelog
+    rsync -rtzv --delete --protect-args --exclude "changelog" --exclude "data/" "/srv/deploy/install/$pkgID/" "$PWD/install/$pkgID/"
     # copy back all other other subfolders in the package directory, assuming that there are part of the winst files
-    find "/srv/deploy/install/$pkgID/" -mindepth 1 -maxdepth 1 -type d ! -name "data" -exec cp --preserve=timestamps -rv {} winst/ \;
+    #find "/srv/deploy/install/$pkgID/" -mindepth 1 -maxdepth 1 -type d ! -name "data" -exec cp --preserve=timestamps -rv {} winst/ \;
   fi
 
   if [ -e "/srv/deploy/install/$pkgID/data/" ]
   then
-    cp --preserve=timestamps -rv "/srv/deploy/install/$pkgID/data/"* data/
+    rsync -rtzv --delete --protect-args "/srv/deploy/install/$pkgID/data/" "$PWD/data/"
+    #cp --preserve=timestamps -rv "/srv/deploy/install/$pkgID/data/"* data/
   fi
 
-  DataFiles=(data/*)
-  if [ ${#DataFiles[@]} -gt 0 ]
-  then
-    for i in data/*
-    do
-      if ! [ -e "/srv/deploy/install/$pkgID/data/$(basename $i)" ]
-      then
-        rm -f "$i"
-      fi
-    done
-  fi
+  #DataFiles=(data/*)
+  #if [ ${#DataFiles[@]} -gt 0 ]
+  #then
+  #  for i in data/*
+  #  do
+  #    if ! [ -e "/srv/deploy/install/$pkgID/data/$(basename $i)" ]
+  #    then
+  #      rm -f "$i"
+  #    fi
+  #  done
+  #fi
 fi
