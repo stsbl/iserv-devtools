@@ -3,22 +3,32 @@
 export DEBEMAIL=repository@stsbl.de
 export DEBFULLNAME=Stadtteilschule\ Blankenese
 
-if [ ! -f "winst/control" ]
+PKG=$(basename $PWD)
+WINSTPKG=${PKG#winst-}
+
+if [ ! -f "control" ] && [ ! -f "install/$WINSTPKG/control" ]
 then
   echo -e "No control file found!\nWrong directory?" 1>&2
   exit 1
 fi
 
+FILE=control
+
+if [ ! -f "control" ]
+then
+  FILE=install/$WINSTPKG/control
+fi
+
 # extract version number
 VER=$(awk 'END { print ver "-" rel } \
   /^version: / { ver = $2 } \
-  /^packageVersion: / { rel = $2 }' winst/control)
+  /^packageVersion: / { rel = $2 }' $FILE)
 
 # extract package name
-NAME=$(grep -E "^name: (.*)$" winst/control | sed 's/name: //g')
+NAME=$(grep -m 1 -E "^name:" $FILE | sed 's/name: //')
 
 # extract package description
-DESCRIPTION=$(grep -E "^description: (.*)$" winst/control | sed 's/description: //g')
+DESCRIPTION=$(grep -m 1 -E "^description:" $FILE | sed 's/description: //')
 
 dh_make -c mit -i -n -p $(basename $PWD)_$VER
 
@@ -34,8 +44,8 @@ sed -i "/# Please avoid to pick license terms that are more restrictive than the
 sed -i "/# packaged work, as it may make Debian's contributions unacceptable upstream./d" debian/copyright
 
 sed -i '/Homepage: <insert the upstream URL, if relevant>/d' debian/control
-sed -i '/#Vcs-Git: git:\/\/anonscm.debian.org\/collab-maint\/winst-win32-disk-imager.git/d' debian/control
-sed -i '/#Vcs-Browser: http:\/\/anonscm.debian.org\/?p=collab-maint\/winst-win32-disk-imager.git;a=summary/d' debian/control
+sed -i '/#Vcs-Git: git:\/\/anonscm.debian.org\/collab-maint\/'$PKG'.git/d' debian/control
+sed -i '/#Vcs-Browser: http:\/\/anonscm.debian.org\/?p=collab-maint\/'$PKG'.git;a=summary/d' debian/control
 
 # fill control
 sed -i "s/Description: <insert up to 60 chars description>/Description: $NAME/g" debian/control
@@ -52,3 +62,6 @@ then
   echo "debian/files" >> .gitignore
   echo "debian/debhelper-build-stamp" >> .gitignore
 fi
+
+# copy rules
+cp -a /usr/share/iserv/dev/debian-rules.template debian/rules
