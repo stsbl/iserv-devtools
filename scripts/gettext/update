@@ -10,7 +10,10 @@ fi
 
 if [ -z "$ISERV_GIT_BASE" ]
 then
-  if [ -d ~/git ]
+  if [ -d ~/stsbl-git ]
+  then
+    ISERV_GIT_BASE=~/stsbl-git
+  elif [ -d ~/git ]
   then
     ISERV_GIT_BASE=~/git
   elif [ -d /var/cache/iserv/build ]
