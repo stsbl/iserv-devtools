@@ -28,8 +28,8 @@ fi
 gbp dch -U "$Urgency" -D experimental --full --git-author -R -N "$1" --since "$Since"
 
 # replace maintainer
-Maintainer=$(cat "$CONFIGDIRPREFIX"/etc/stsbl/repository/maintainer)
-sed -i "s/-- $(echo $DEBFULLNAME) <$(echo $DEBEMAIL)>/-- $(echo $Maintainer)/g" debian/changelog
+#Maintainer=$(cat "$CONFIGDIRPREFIX"/etc/stsbl/repository/maintainer)
+#sed -i "s/-- $(echo $DEBFULLNAME) <$(echo $DEBEMAIL)>/-- $(echo $Maintainer)/g" debian/changelog
 
 git add debian/changelog
 git commit -m "Update changelog for $1 release."
