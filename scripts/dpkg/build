@@ -54,19 +54,19 @@ then
   exit 1
 fi
 
-if [ ! -e "../$PACKAGE/$UPSTREAMVERSION/$PLAINREVISION" ]
+if [ ! -e "/root/$PACKAGE/$UPSTREAMVERSION/$PLAINREVISION" ]
 then
-  mkdir -pv ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"
+  mkdir -pv /root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"
 fi
 
 # create destionations
-if [ ! -e "../package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$PLAINREVISION""/""$PACKAGE""_""$UPSTREAMVERSION""$REVISION""_all.deb" ]
+if [ ! -e "/root/package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$PLAINREVISION""/""$PACKAGE""_""$UPSTREAMVERSION""$REVISION""_all.deb" ]
 then
-  touch ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb
+  touch /root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb
 fi
 
 # link destinations
-ln -sfv ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb ../"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb
+ln -sfv /root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb ../"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb
 
 for i in $ADDITIONALBINARYPACKAGES
 do
@@ -76,18 +76,18 @@ do
     if [ -e "../""$i""_""$UPSTREAMVERSION""$REVISION""_all.deb" ] && [ -L "../""$i""_""$UPSTREAMVERSION""$REVISION""_all.deb" ]
     then
       rm -f ../"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb
-    elif [ -e "../""$i""_""$UPSTREAMVERSION""$REVISION""_all.deb" ] && [ ! -L "../$i""_""$UPSTREAMVERSION""$REVISION""_all.deb" ]
+    elif [ -e "/root/""$i""_""$UPSTREAMVERSION""$REVISION""_all.deb" ] && [ ! -L "../$i""_""$UPSTREAMVERSION""$REVISION""_all.deb" ]
     then
       echo "Destination .deb exists and is not a symbolic link! Terminating!" >&2
       exit 1
     fi
 
-    if [ ! -e "../package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$PLAINREVISION""/""$i""_""$UPSTREAMVERSION""$REVISION""_all.deb" ]
+    if [ ! -e "/root/package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$PLAINREVISION""/""$i""_""$UPSTREAMVERSION""$REVISION""_all.deb" ]
     then
-      touch ../package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb
+      touch /root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb
     fi
 
-    ln -sfv ./package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb ../"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb
+    ln -sfv /root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb ../"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb
   fi
 done
 
