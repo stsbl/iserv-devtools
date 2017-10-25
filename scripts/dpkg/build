@@ -91,8 +91,7 @@ do
   fi
 done
 
-dpkg-buildpackage -b
-lintian || true
+debuild -us -uc -b
 
 # remove links
 rm -f ../"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb
@@ -101,3 +100,5 @@ for i in $ADDITIONALBINARYPACKAGES
 do
   rm -f ../"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb
 done
+
+dh clean
