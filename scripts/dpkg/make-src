@@ -33,5 +33,13 @@ then
   echo "debian/*.debhelper" >> .gitignore
 fi
 
-# apply rules file with dh_iserv3install
+# apply rules file with dh_iservinstall3
 cp -a /usr/share/iserv/dev/debian-rules.template debian/rules
+
+# append our Build-Depends
+sed -i -E '/Build-Depends: (.*)$/ a\
+Build-Depends-Indep: iserv3-dev' debian/control
+
+# bump compatlevel
+echo 10 > debian/compat
+sed -i -E 's/debhelper \(>= (.*)\)/debhelper \(>= 10\)/g' debian/control
