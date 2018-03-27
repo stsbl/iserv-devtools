@@ -1,49 +1,36 @@
 #!/bin/bash -e
 
 export LC_ALL=C
-export EDITOR=$(which dummy-editor)
 
-ISNATIVE=1
-ISWINST=1
+NATIVE=no
 
-while getopts "hnw" option
+while getopts "h" option
 do
   case $option in
-    (n) ISNATIVE=0;;
-    (w) ISWINST=0;;
+    (n) NATIVE="yes"
+    ;;
     (h) cat <<EOUSAGE ; exit 0;;
 Usage: $(basename $0) [options]
 Options
-  -p     prevent updating of install file
-  -n     build package with native version number
-  -w     build winst package
+  -n     package is a native package without revision
   -h     show this help
 EOUSAGE
   esac
 done
 
-ADDITIONALBINARYPACKAGES=$(pcregrep "^Package: (.*)$" debian/control | awk '{ print $2 }' | sed ':a;N;$!ba;s/\n/ /g')
-VERSIONSTRING=$(pcregrep -M "^(.*) \((.*)\) (.*); urgency=(.*)$" debian/changelog | head -n 1)
-PACKAGE=$(echo $VERSIONSTRING | awk '{ print $1 }')
-VERSION=$(echo $VERSIONSTRING | awk '{ print $2 }' | sed 's/(//g' | sed 's/)//g')
+ADDITIONALBINARYPACKAGES=$(awk '$1 == "Package:" { print $2 }' debian/control)
+PACKAGE=$(dpkg-parsechangelog | awk '$1 == "Source:" { print $2 }')
+VERSION=$(dpkg-parsechangelog | awk '$1 == "Version:" { print $2 }')
 UPSTREAMVERSION=${VERSION%-*}
 
 REVISION="-"${VERSION#*-}
 PLAINREVISION=${VERSION#*-}
 
-if [ $ISNATIVE = 0 ]
+if [ "$NATIVE" = "yes" ]
 then
   REVISION=
   PLAINREVISION=
 fi
-
-if [ -f "/debian/install" ]
-then
-  rm -f /debian/install
-  git add .
-  git commit -m "Removed legacy install file."
-fi
-
 # link deb file
 if [ -e "../""$PACKAGE""_""$UPSTREAMVERSION""$REVISION""_all.deb" ] && [ -L "../""$PACKAGE""_""$UPSTREAMVERSION""$REVISION""_all.deb" ]
 then
