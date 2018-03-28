@@ -63,3 +63,10 @@ cat > "usr/share/lintian/overrides/$PKG" <<EOT
 $PKG: extra-license-file usr/share/doc/$PKG/LICENSE
 EOT
 
+# create extra install rules
+cat > "debian/$PKG.install" <<EOT
+LICENSE* usr/share/doc/$PKG
+EOT
+
+# copy license
+cp -a /usr/share/iserv/dev/LICENSE .
