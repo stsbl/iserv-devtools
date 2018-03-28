@@ -1,3 +1,9 @@
+stsbl-iserv-devtools (18.03.28-2) experimental; urgency=medium
+
+  * stsbl-dev-dpkg-make-src: Added license file on creation
+
+ -- Felix Jacobi <felix.jacobi@stsbl.de>  Wed, 28 Mar 2018 02:10:29 +0200
+
 stsbl-iserv-devtools (18.03.28-1) experimental; urgency=medium
 
   * Initial Release.
