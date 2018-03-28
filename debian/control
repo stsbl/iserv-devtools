@@ -1,0 +1,17 @@
+Source: stsbl-iserv-devtools
+Section: misc
+Priority: extra
+Maintainer: Stadtteilschule Blankenese <repository@stsbl.de>
+Build-Depends: debhelper (>= 10)
+Build-Depends-Indep: iserv3-dev
+Standards-Version: 4.1.3.0
+
+Package: stsbl-iserv-devtools
+Architecture: all
+Depends: ${misc:Depends},
+  ${perl:Depends},
+  iserv-portal,
+Description: Stadtteilschule Blankenese: IServ-Entwicklungswerkzeuge
+ Enthält die von der Stadtteilschule Blankenese zur IServ-Entwicklung
+ verwendeten Tools und Skripte.
+Tag: implemented-in::shell

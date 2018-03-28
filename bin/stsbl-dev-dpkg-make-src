@@ -3,17 +3,16 @@
 export DEBFULLNAME=Stadtteilschule\ Blankenese
 export DEBEMAIL=repository@stsbl.de
 
-if [ -z "$1" ]
-then
- echo "Usement: $(basename $0) [VERSION]"
- exit 1
-fi
+DATE=$(date +%y.%m.%d)
+VER="$DATE-1"
+PKG="$(basename $PWD)"
 
-dh_make -c mit -p $(basename $PWD)_$1 -i -n
+dh_make -c mit -p "$PKG_$VER" -i -n
 
 rm -f debian/*.{ex,EX}
 rm -f debian/README*
 rm -f debian/docs
+rm debian/*.docs
 
 # remove clutter
 sed -i '/Source: <url:\/\/example.com>/d' debian/copyright
@@ -22,12 +21,15 @@ sed -i "/# different copyright\/license attached and list them here./d" debian/c
 sed -i "/# Please avoid to pick license terms that are more restrictive than the/d" debian/copyright
 sed -i "/# packaged work, as it may make Debian's contributions unacceptable upstream./d" debian/copyright
 
+sed -E -i '/^#Vcs-Git:/d' debian/control
+sed -E -i '/^#Vcs-Browser:/d' debian/control
+
 if [ ! -e ".gitignore" ]
 then
   # create .gitignore
-  echo "debian/$(basename $PWD)/*" > .gitignore
-  echo "debian/$(basename $PWD).substvars" >> .gitignore
-  echo "debian/$(basename $PWD).debhelper.log" >> .gitignore
+  echo "debian/$PKG/*" > .gitignore
+  echo "debian/$PKG.substvars" >> .gitignore
+  echo "debian/$PKG.debhelper.log" >> .gitignore
   echo "debian/files" >> .gitignore
   echo "debian/debhelper-build-stamp" >> .gitignore
   echo "debian/*.debhelper" >> .gitignore
@@ -43,3 +45,21 @@ Build-Depends-Indep: iserv3-dev' debian/control
 # bump compatlevel
 echo 10 > debian/compat
 sed -i -E 's/debhelper \(>= (.*)\)/debhelper \(>= 10\)/g' debian/control
+
+# set section and priority
+sed -E -i 's/^Section: (.*)/Section: misc/g' debian/control
+sed -E -i 's/^Priority: (.*)/Priority: extra/g' debian/control
+
+# insert additional deps
+sed -E -i '/^Depends: \$\{misc:Depends\}/a\
+  ${perl:Depends}\,\
+  iserv-portal\,' debian/control
+sed -i 's/${misc:Depends}/${misc:Depends},/g' debian/control
+
+# create linitian rules
+mkdir -p usr/share/lintian/overrides
+cat > "usr/share/lintian/overrides/$PKG" <<EOT
+# by design
+$PKG: extra-license-file usr/share/doc/$PKG/LICENSE
+EOT
+
