@@ -1,2 +1,5 @@
 # by design
 stsbl-iserv-devtools: extra-license-file usr/share/doc/stsbl-iserv-devtools/LICENSE
+
+# is a template
+stsbl-iserv-devtools: extra-license-file usr/share/iserv/dev/LICENSE
