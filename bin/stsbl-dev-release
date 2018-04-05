@@ -1,0 +1,41 @@
+#!/bin/bash
+set -e
+
+MERGE="yes"
+
+if [ ! -z "$1" ]; then
+  MERGE="no"
+fi
+
+CURRENTVER=$(dpkg-parsechangelog | sed -n 's/^Version: //p')
+CURRENTDATE=$(echo $CURRENTVER | sed -r -n 's/^([0-9]{2}\.[0-9]{2}\.[0-9]{2})-([0-9]+)$/\1/p')
+CURRENTREV=$(echo $CURRENTVER | sed -r -n 's/^([0-9]{2}\.[0-9]{2}\.[0-9]{2})-([0-9]+)$/\2/p')
+DATE=$(date +%y.%m.%d)
+
+if [ "$DATE" == "$CURRENTDATE" ]
+then
+	let REV=$CURRENTREV+1
+else
+	REV=1
+fi
+
+VER=$DATE'-'$REV
+
+echo $VER
+
+if [ "$MERGE" == "yes" ]
+then
+  git checkout unstable
+  git merge master
+fi
+gbp dch --ignore-branch -a -N"$VER" --git-author --multimaint-merge \
+    --debian-tag="iserv/%(version)s"
+dch -r
+git commit -m "released $VER" debian/changelog
+if [ "$MERGE" == "yes" ]
+then
+  git checkout master
+  git merge unstable
+  git branch --list master unstable testing stable | sed 's/^..//' | xargs git push origin --
+fi
+
