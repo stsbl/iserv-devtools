@@ -1,0 +1,56 @@
+#!/usr/bin/perl -CSDAL
+
+# helper to execute dh_installinit for init scripts packaged on
+# IServ way
+
+use Debian::Debhelper::Dh_Lib;
+
+use warnings;
+use strict;
+use Array::Utils qw(array_minus);
+use File::Slurp::Unicode;
+use Text::Glob qw(match_glob);
+use Getopt::Long;
+use List::MoreUtils qw(uniq);
+
+init();
+
+my %opt;
+GetOptions(\%opt,
+    'exclude|X=s@',
+    'help|h|?',
+) or $opt{help} = 1;
+
+print <<USAGE and exit if @ARGV != 0 || $opt{help};
+Usage: $0 [options]
+Options
+ -X, --exclude=EXCLUDE  exclude pattern (multiple usage allowed)
+ -h, --help             show this help
+USAGE
+
+
+my @excludes = qw(debian/* .gitattributes .gitignore .gitlab-ci.yml);
+push @excludes, @{$opt{exclude}} if defined $opt{exclude};
+
+my @files = split /\0/, `git ls-files -z`;
+@files = array_minus(@files, @{[match_glob($_, @files)]}) for @excludes;
+
+
+my $pat = "{init.d/*,etc/init.d/*}";
+
+my @services;
+
+for (match_glob($pat, @files))
+{
+  if (/(etc\/|)init\.d\/([^\/]*)$/)
+  {
+    push @services, $2;
+  }
+}
+
+for (uniq @services)
+{
+  # make like output
+  print "   dh_installinit -o --name $_ --error-handler=true\n";
+  system "dh_installinit", "-o", "--name", "$_", "--error-handler=true";
+}
