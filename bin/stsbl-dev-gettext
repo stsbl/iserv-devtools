@@ -129,7 +129,7 @@ do
   # reuse locales from IServ Core
   ISERVCORELOCALES=$(dpkg -L iserv3-crud iserv3-addressbook iserv3-admin iserv3-config \
     iserv3-file iserv3-host iserv3-mail iserv3-package iserv3-api iserv3-crud \
-    iserv3-vendor | grep -E "^/usr/share/iserv/locale/$LANG/(.*).po$" | grep -v 'js3')
+    iserv3-vendor | grep -E "^/usr/share/iserv/locale/$LANG/(.*).po$" | grep -v '3-js')
  
   # use custom parent locales if available
   if [ -f "$DESTDIR/templates/$NAME"".parent" ]
@@ -140,7 +140,7 @@ do
   # reuse locales for JS from IServ Core
   ISERVCOREJSLOCALES=$(dpkg -L iserv3-crud iserv3-addressbook iserv3-admin iserv3-config \
     iserv3-file iserv3-host iserv3-mail iserv3-package iserv3-api iserv3-crud \
-    iserv3-vendor | grep -E "^/usr/share/iserv/locale/$LANG/(.*)-js3.po$")
+    iserv3-vendor | grep -E "^/usr/share/iserv/locale/$LANG/(.*)3-js.po$")
    
   for PO in $ISERVCORELOCALES
   do

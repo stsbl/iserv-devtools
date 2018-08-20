@@ -1,7 +1,13 @@
 #!/bin/sh
 
 PKG="$1"
-NAME="$(echo "$PKG" | sed 's/^stsbl-iserv-//')"
+
+if [ -z "$PKG" ]
+then
+  PKG=$(basename $PWD)
+fi
+
+NAME="$(echo "$PKG" | sed 's/^stsbl-iserv3-//' | sed 's/^stsbl-iserv-//')"
 
 if [ -z "$PKG" ] || [ -z "$NAME" ]
 then
