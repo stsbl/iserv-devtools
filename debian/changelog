@@ -1,3 +1,13 @@
+stsbl-iserv-devtools (18.09.12-1) experimental; urgency=medium
+
+  * Added stsbl-dev-release (fork of iserv3release)
+  * Added debhelper and debhelper sequencer
+  * Updated translation handling to current IServ state of the art
+  * Updated build rules for webpack support
+  * Added tools for webpack building
+
+ -- Felix Jacobi <felix.jacobi@stsbl.de>  Wed, 12 Sep 2018 02:02:59 +0200
+
 stsbl-iserv-devtools (18.03.28-5) experimental; urgency=medium
 
   * Fixed control
