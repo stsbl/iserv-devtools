@@ -4,14 +4,7 @@ use strict;
 use Debian::Debhelper::Dh_Lib;
 
 remove_command("dh_iservcopyright");
-
-if (compat("10"))
-{
-  insert_before("dh_systemd_start", "dh_stsblinit");
-}
-else
-{
-  insert_before("dh_installsystemd", "dh_stsblinit");
-}
+insert_before("dh_iservinstall3", "dh_iservassetsbuild");
+insert_after("dh_iservinstall3", "dh_iservassetsclean");
 
 1;

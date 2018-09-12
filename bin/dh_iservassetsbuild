@@ -1,0 +1,10 @@
+#!/usr/bin/perl -CSDAL
+
+use warnings;
+use strict;
+use Debian::Debhelper::Dh_Lib;
+
+init();
+
+system "webpack";
+system "git", "add", "--intent-to-add", "public/";

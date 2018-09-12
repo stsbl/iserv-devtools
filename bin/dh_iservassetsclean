@@ -1,0 +1,9 @@
+#!/usr/bin/perl -CSDAL
+
+use warnings;
+use strict;
+use Debian::Debhelper::Dh_Lib;
+
+init();
+
+system "git", "rm", "-rf", "public/";
