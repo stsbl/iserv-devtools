@@ -2,3 +2,6 @@
 
 %:
 	dh $@ --with iserv --with stsbl
+
+override_dh_iservinstall3:
+	dh_iservinstall3 -X 'docker/*'
