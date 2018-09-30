@@ -6,5 +6,5 @@ use Debian::Debhelper::Dh_Lib;
 
 init();
 
-system "stsbl-webpack";
+system "stsbl-webpack", "-p";
 system "git", "add", "--intent-to-add", "public/";
