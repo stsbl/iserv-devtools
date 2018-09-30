@@ -14,6 +14,7 @@ Depends: ${misc:Depends},
   iserv3-dev,
 # for lintian
   make | build-essential | dpkg-dev,
+Xb-Private-IServ-Revision: ${iserv:Revision}
 Description: Stadtteilschule Blankenese: IServ-Entwicklungswerkzeuge
  Enthält die von der Stadtteilschule Blankenese zur IServ-Entwicklung
  verwendeten Tools und Skripte.
