@@ -1,3 +1,13 @@
+stsbl-iserv-devtools (18.09.30-1) experimental; urgency=medium
+
+  * Added transitional webpack container with 3rd-party support
+  * dh_iservassetsbuild: Use stsbl-webpack instead of webpack
+  * stsbl-dev-release: Synchronized with iserv3release
+  * dh_iservassetsbuild: Use production mode of webpack
+  * stsbl-dev-dpkg-build: Added support for addtional debuild arguments
+
+ -- Felix Jacobi <felix.jacobi@stsbl.de>  Sun, 30 Sep 2018 13:10:14 +0200
+
 stsbl-iserv-devtools (18.09.12-1) experimental; urgency=medium
 
   * Added stsbl-dev-release (fork of iserv3release)
