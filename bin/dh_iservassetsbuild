@@ -6,5 +6,18 @@ use Debian::Debhelper::Dh_Lib;
 
 init();
 
-system "stsbl-webpack", "-p";
+my @configs = glob "src/*/*Bundle/Resources/webpack.config.js";
+my @args;
+
+for  my $config (@configs)
+{
+  push @args, "--config";
+  push @args, $config;
+}
+
+print "webpack -p ";
+print @configs;
+print "\n";
+
+system "webpack", "-p", @args;
 system "git", "add", "--intent-to-add", "public/";
