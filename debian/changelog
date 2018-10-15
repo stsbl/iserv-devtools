@@ -1,3 +1,11 @@
+stsbl-iserv-devtools (18.10.15-1) experimental; urgency=medium
+
+  [ Felix Jacobi ]
+  * Updated dh_iservassetsbuild to use iserv webpack container
+  * Updated build rule
+
+ -- Felix Jacobi <felix.jacobi@stsbl.de>  Mon, 15 Oct 2018 19:45:30 +0200
+
 stsbl-iserv-devtools (18.09.30-3) experimental; urgency=medium
 
   * Added missing git revision to control
