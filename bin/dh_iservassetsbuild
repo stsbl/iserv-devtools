@@ -6,6 +6,9 @@ use Debian::Debhelper::Dh_Lib;
 
 init();
 
+# minify css
+$ENV{"NODE_ENV"} = "production";
+
 my @configs = glob "src/*/*Bundle/Resources/webpack.config.js";
 my @args;
 
