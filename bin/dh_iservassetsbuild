@@ -9,18 +9,32 @@ init();
 # minify css
 $ENV{"NODE_ENV"} = "production";
 
-my @configs = glob "src/*/*Bundle/Resources/webpack.config.js";
+my @configs = grep -e, glob "{src/*/*Bundle/Resources/webpack.config.js," .
+    "bundle/*/Resources/webpack.config.js," .
+    "*Bundle/Resources/webpack.config.js," .
+    "share/app/Resources/webpack.config.js," .
+    "share/webpack-vendor.config.js," .
+    "webpack.config.js}"
+;
 my @args;
 
-for  my $config (@configs)
+if (not @configs)
+{
+  print "No webpack configurations found.\n";
+  exit;
+}
+
+for my $config (@configs)
 {
   push @args, "--config";
   push @args, $config;
 }
 
-print "webpack -p ";
-print @configs;
+print "stsbl-webpack -p ";
+print join " ", @args;
 print "\n";
 
-system "webpack", "-p", @args;
-system "git", "add", "--intent-to-add", "public/";
+system "stsbl-webpack", "-p", @args and
+    error "Failed to run webpack: $!";
+system "git", "add", "--intent-to-add", "public/assets" and
+    error "Failed to add assets: $!";

@@ -1,0 +1,32 @@
+#!/bin/bash -e
+
+# Add mount points via variable because sometimes we run this script from /usr/share/iserv
+# and docker does not like duplicated mounts
+ISERV_MOUNTS=''
+if [ "$PWD" != "/usr/share/iserv" ]; then
+  ISERV_MOUNTS+=' -v /usr/share/iserv:/usr/share/iserv:ro'
+fi
+
+for SRCDIR in /root/git /var/cache/iserv/build /var/local/src/iserv; do
+  if [ -d "$SRCDIR" ]; then
+    ISERV_MOUNTS+=" -v $SRCDIR:$SRCDIR:ro"
+  fi
+done
+
+# Set NODE_ENV to development is not already set.
+# The calling script on build.iserv.eu sets this to "production"
+ENV="$NODE_ENV"
+if [ "$ENV" == "" ]; then
+  ENV="development"
+fi
+
+# Finally run docker
+docker run --user $(id -u) \
+  -t \
+  --rm \
+  -e NODE_ENV="$ENV" \
+  $ISERV_MOUNTS \
+  -v $PWD:$PWD \
+  -w $PWD \
+  iserv/webpack \
+  "$@"
