@@ -9,12 +9,12 @@ init();
 # minify css
 $ENV{"NODE_ENV"} = "production";
 
-my @configs = grep -e, glob "{src/*/*Bundle/Resources/webpack.config.js," .
-    "bundle/*/Resources/webpack.config.js," .
-    "*Bundle/Resources/webpack.config.js," .
-    "share/app/Resources/webpack.config.js," .
-    "share/webpack-vendor.config.js," .
-    "webpack.config.js}"
+my @configs = grep -e, glob "{{modules,src}/*/*Bundle/Resources/webpack.config.js," .
+     "bundle/*/Resources/webpack.config.js,".
+     "*Bundle/Resources/webpack.config.js,".
+     "web/app/Resources/webpack.config.js,".
+     "web/webpack-vendor.config.js,"
+     "webpack.config.js}"
 ;
 my @args;
 
