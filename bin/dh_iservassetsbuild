@@ -13,7 +13,7 @@ my @configs = grep -e, glob "{{modules,src}/*/*Bundle/Resources/webpack.config.j
      "bundle/*/Resources/webpack.config.js,".
      "*Bundle/Resources/webpack.config.js,".
      "web/app/Resources/webpack.config.js,".
-     "web/webpack-vendor.config.js,"
+     "web/webpack-vendor.config.js,".
      "webpack.config.js}"
 ;
 my @args;

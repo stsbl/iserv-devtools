@@ -7,7 +7,7 @@ DATE=$(date +%y.%m.%d)
 VER="$DATE-1"
 PKG="$(basename $PWD)"
 
-dh_make -c mit -p "$PKG_$VER" -i -n
+dh_make -c mit -p "${PKG}_${VER}" -i -n
 
 rm -f debian/*.{ex,EX}
 rm -f debian/README*
