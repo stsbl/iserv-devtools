@@ -1,3 +1,9 @@
+stsbl-iserv-devtools (18.11.25-2) experimental; urgency=medium
+
+  * dh_iservassetsclean: Fixed public directory determination
+
+ -- Felix Jacobi <felix.jacobi@stsbl.de>  Sun, 25 Nov 2018 23:32:31 +0100
+
 stsbl-iserv-devtools (18.11.25-1) experimental; urgency=medium
 
   * dh_iservassetsbuild: Added NODE_ENV
