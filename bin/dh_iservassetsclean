@@ -6,6 +6,6 @@ use Debian::Debhelper::Dh_Lib;
 
 init();
 
--f "public/assets" and
+-d "public/assets" and
     system "git", "rm", "-rf", "public/assets" and
     error "Failed to remove assets: $!";
