@@ -1,3 +1,12 @@
+stsbl-iserv-devtools (18.11.25-1) experimental; urgency=medium
+
+  * dh_iservassetsbuild: Added NODE_ENV
+  * Assets: Improved and use custom wrapper again
+  * Adapted module structure to web application move
+  * stsbl-dev-dpkg-make-src: Updated
+
+ -- Felix Jacobi <felix.jacobi@stsbl.de>  Sun, 25 Nov 2018 22:42:42 +0100
+
 stsbl-iserv-devtools (18.10.15-1) experimental; urgency=medium
 
   [ Felix Jacobi ]
