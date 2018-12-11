@@ -56,7 +56,7 @@ then
   git checkout master
   git merge unstable
   git branch --list master unstable testing stable | sed 's/^..//' | xargs git push origin --
-  git tag -a "stsbl/$VER" -m ''
+  git stag -a "stsbl/$VER" -m ''
   git push --tags
 fi
 
