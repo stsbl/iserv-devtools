@@ -55,10 +55,12 @@ then
   touch /root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb
 fi
 
+DDIFF=()
+
 # link destinations
+DDIFF+=(/root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb)
 ln -sfv /root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb ../"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb
 
-DDIFF=()
 for i in $ADDITIONALBINARYPACKAGES
 do
   if ! [ "$i" = "$PACKAGE" ]
@@ -95,6 +97,8 @@ done
 
 dh clean
 
-echo "Running ddiff ..."
-ddiff -a "${DDIFF[@]}" | vim -R -
-
+if [ "$DDIFF" = "yes" ]
+then
+  echo "Running ddiff ..."
+  ddiff -a "${DDIFF[@]}" | vim -R -
+fi
