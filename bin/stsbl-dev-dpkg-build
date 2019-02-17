@@ -3,11 +3,14 @@
 export LC_ALL=C
 
 NATIVE=no
+DDIFF=yes
 
 while getopts "nha" option
 do
   case $option in
-    (n) NATIVE="yes"
+    (d) DDIFF=no
+    ;;
+    (n) NATIVE=yes
     ;;
     (h) cat <<EOUSAGE ; exit 0;;
 Usage: $(basename $0) [options]
@@ -55,6 +58,7 @@ fi
 # link destinations
 ln -sfv /root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb ../"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb
 
+DDIFF=()
 for i in $ADDITIONALBINARYPACKAGES
 do
   if ! [ "$i" = "$PACKAGE" ]
@@ -74,6 +78,7 @@ do
       touch /root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb
     fi
 
+    DDIFF+=(/root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb)
     ln -sfv /root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb ../"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb
   fi
 done
@@ -89,3 +94,7 @@ do
 done
 
 dh clean
+
+echo "Running ddiff ..."
+ddiff -a "${DDIFF[@]}" | vim -R -
+

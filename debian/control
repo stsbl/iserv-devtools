@@ -11,6 +11,7 @@ Architecture: all
 Depends: ${misc:Depends},
   ${perl:Depends},
   iserv-portal,
+  iserv-dev,
   iserv3-dev,
 # for lintian
   make | build-essential | dpkg-dev,
