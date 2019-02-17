@@ -5,7 +5,7 @@ export LC_ALL=C
 NATIVE=no
 USE_DDIFF=yes
 
-while getopts "nha" option
+while getopts "dhn" option
 do
   case $option in
     (d) USE_DDIFF=no
@@ -15,6 +15,7 @@ do
     (h) cat <<EOUSAGE ; exit 0;;
 Usage: $(basename $0) [options]
 Options
+  -d     do not start ddiff after package build
   -n     package is a native package without revision
   -h     show this help
 EOUSAGE
