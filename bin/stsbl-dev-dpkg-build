@@ -3,12 +3,12 @@
 export LC_ALL=C
 
 NATIVE=no
-DDIFF=yes
+USE_DDIFF=yes
 
 while getopts "nha" option
 do
   case $option in
-    (d) DDIFF=no
+    (d) USE_DDIFF=no
     ;;
     (n) NATIVE=yes
     ;;
@@ -97,7 +97,7 @@ done
 
 dh clean
 
-if [ "$DDIFF" = "yes" ]
+if [ "$USE_DDIFF" = "yes" ]
 then
   echo "Running ddiff ..."
   ddiff -a "${DDIFF[@]}" | vim -R -
