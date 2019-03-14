@@ -18,6 +18,7 @@ rm debian/*.docs
 sed -i '/Source: <url:\/\/example.com>/d' debian/copyright
 sed -i "/# Please also look if there are files or directories which have a/d" debian/copyright
 sed -i "/# different copyright\/license attached and list them here./d" debian/copyright
+sed -i "/# Please avoid picking licenses with terms that are more restrictive than the/" debian/copyright
 sed -i "/# Please avoid to pick license terms that are more restrictive than the/d" debian/copyright
 sed -i "/# Please avoid picking licenses with terms that are more restrictive than the/d" debian/copyright
 sed -i "/# packaged work, as it may make Debian's contributions unacceptable upstream./d" debian/copyright
@@ -44,7 +45,7 @@ sed -i -E '/Build-Depends: (.*)$/ a\
 Build-Depends-Indep: iserv3-dev' debian/control
 
 # bump compatlevel
-echo 10 > debian/compat
+echo 11 > debian/compat
 sed -i -E 's/debhelper \(>= (.*)\)/debhelper \(>= 10\)/g' debian/control
 
 # set section and priority
