@@ -40,7 +40,7 @@ SRCDIR="$ISERV_GIT_BASE/$PKG"
 BUNDLES=()
 TRANSLATIONSDIR=/var/lib/translations
 
-for BUNDLE in $SRCDIR/src/*/*Bundle
+for BUNDLE in $SRCDIR/{src/*/*Bundle,modules/*/*Bundle}
 do
   BUNDLES+=($(basename $BUNDLE))
 done
@@ -64,7 +64,7 @@ TWIG_CACHE=()
 for BUNDLE in "${BUNDLES[@]}"
 do
   TMP="/tmp/$NAME-Stsbl$BUNDLE.twig.php"
-  symfony iserv:dev:twig2php Stsbl"$BUNDLE" "$TMP"
+  symfony --env=dev iserv:dev:twig2php Stsbl"$BUNDLE" "$TMP"
   TWIG_CACHE+=("$TMP")
 done
 find . -not -path "./debian/*" -regextype posix-extended -regex '.*\.(php|mod)$' -type f -exec xgettext --copyright-holder="Stadtteilschule Blankenese" --package-name="$PKG" --language PHP --from-code=utf-8 -k_n:1,2 -kpgettext:1c,2 -k_p:1c,2 -k_np:1c,2,3 -knpgettext:1c,2,3 -k__:1 -k__n:1,2 -k__p:1c,2 -k__np:1c,2,3 -o "$DESTDIR/templates/$NAME.pot" "${TWIG_CACHE[@]}" {} +
