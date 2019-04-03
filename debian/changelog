@@ -1,3 +1,10 @@
+stsbl-iserv-devtools (19.04.03-1) experimental; urgency=medium
+
+  * stsbl-dev-dpkg-make-src: Fixed cleaning up of boiler plate and bumped compat level
+  * stsbl-dev-gettext: Adapted for package structure changes
+
+ -- Felix Jacobi <Felix@jacobi-hamburg.net>  Wed, 03 Apr 2019 02:10:48 +0200
+
 stsbl-iserv-devtools (19.02.18-4) experimental; urgency=medium
 
   * stsbl-dev-dpkg-build: Fixed ddiff exclusion
