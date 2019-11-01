@@ -1,0 +1,24 @@
+#!/bin/bash
+shopt -s nullglob
+
+Bundles=$(
+if [ -d "bundle" ]
+then
+  cd bundle
+  echo *Bundle
+  cd -
+fi
+if [ -d "modules" ]
+then
+  cd modules
+  echo */*
+  cd -
+fi
+);
+
+if [ -z "$Bundles" ]
+then
+  exit 0
+fi
+
+grep -r 'Bundle' {bundle,modules} 2> /dev/null | grep -oE ':(.*)' | grep -vE "($(echo -n $Bundles | tr " " "|"))" | grep -oE 'IServ\\(\w+)Bundle' | perl -mList::MoreUtils -e 'print List::MoreUtils::uniq sort <STDIN>'

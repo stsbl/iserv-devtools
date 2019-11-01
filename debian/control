@@ -13,6 +13,7 @@ Depends: ${misc:Depends},
   iserv-portal,
   iserv-dev,
   iserv3-dev,
+  liblist-moreutils-perl,
 # for lintian
   make | build-essential | dpkg-dev,
 Xb-Private-IServ-Revision: ${iserv:Revision}
