@@ -1,3 +1,12 @@
+stsbl-iserv-devtools (19.12.07-1) stable; urgency=medium
+
+  * Bumped copyright
+  * Added ls-bundle-deps
+  * Stsbl-dev-dpkg-build: Update source lists before running ddiff
+  * Stsbl-dev-dpkg-make-src: Fixed removing of boilerplate
+
+ -- Felix Jacobi <Felix@jacobi-hamburg.net>  Sat, 07 Dec 2019 20:46:37 +0100
+
 stsbl-iserv-devtools (19.04.03-1) experimental; urgency=medium
 
   * stsbl-dev-dpkg-make-src: Fixed cleaning up of boiler plate and bumped compat level
