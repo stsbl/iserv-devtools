@@ -60,13 +60,18 @@ cd $SRCDIR
 
 # Extract PHP/JS to messages/js.pot
 rm -f "$DESTDIR/templates/$NAME"{-js,}".pot"
-TWIG_CACHE=()
+
 for BUNDLE in "${BUNDLES[@]}"
 do
-  TMP="/tmp/$NAME-Stsbl$BUNDLE.twig.php"
-  symfony --env=dev iserv:dev:twig2php Stsbl"$BUNDLE" "$TMP"
-  TWIG_CACHE+=("$TMP")
+  TMP="/tmp/$NAME-Stsbl$BUNDLE"
+  rm -rf "$TMP"
+  mkdir -p "$TMP"
+
+  TWIG_FILES=($(find -name '*.twig' -not -path "./debian/*"))
+  twig2php "${TWIG_FILES[@]}" -o "$TMP"
+  TWIG_CACHE+=($(find "/tmp/$NAME-Stsbl$BUNDLE" -type f -name '*.php'))
 done
+
 find . -not -path "./debian/*" -regextype posix-extended -regex '.*\.(php|mod)$' -type f -exec xgettext --copyright-holder="Stadtteilschule Blankenese" --package-name="$PKG" --language PHP --from-code=utf-8 -k_n:1,2 -kpgettext:1c,2 -k_p:1c,2 -k_np:1c,2,3 -knpgettext:1c,2,3 -k__:1 -k__n:1,2 -k__p:1c,2 -k__np:1c,2,3 -o "$DESTDIR/templates/$NAME.pot" "${TWIG_CACHE[@]}" {} +
 find . -not -path "./debian/*" -name "*.js" -type f -exec xgettext --copyright-holder="Stadtteilschule Blankenese" --package-name="$PKG" --language JavaScript --from-code=utf-8 -k_ -k_p:1c,2 -k__ -k__p:1c,2 -o "$DESTDIR/templates/$NAME-js.pot" {} +
 rm -f "${TWIG_CACHE[@]}"
