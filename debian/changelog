@@ -1,3 +1,14 @@
+stsbl-iserv-devtools (20.07.18-1) stable; urgency=medium
+
+  * Bumped copyright
+  * Removed dh_iservcontrol in debhelper sequence as it is incompatible with
+    our policies
+  * Use twig2php in stsbl-dev-gettext instead of broken command from
+    iserv3-dev
+  * Depend on twig2php
+
+ -- Felix Jacobi <Felix@jacobi-hamburg.net>  Sat, 18 Jul 2020 09:11:23 +0200
+
 stsbl-iserv-devtools (19.12.07-1) stable; urgency=medium
 
   * Bumped copyright
