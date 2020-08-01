@@ -68,8 +68,11 @@ do
   mkdir -p "$TMP"
 
   TWIG_FILES=($(find -name '*.twig' -not -path "./debian/*"))
-  twig2php "${TWIG_FILES[@]}" -o "$TMP"
-  TWIG_CACHE+=($(find "/tmp/$NAME-Stsbl$BUNDLE" -type f -name '*.php'))
+  if [ ${#TWIG_FILES[@]} -gt 0 ]
+  then
+    twig2php "${TWIG_FILES[@]}" -o "$TMP"
+    TWIG_CACHE+=($(find "/tmp/$NAME-Stsbl$BUNDLE" -type f -name '*.php'))
+  fi
 done
 
 find . -not -path "./debian/*" -regextype posix-extended -regex '.*\.(php|mod)$' -type f -exec xgettext --copyright-holder="Stadtteilschule Blankenese" --package-name="$PKG" --language PHP --from-code=utf-8 -k_n:1,2 -kpgettext:1c,2 -k_p:1c,2 -k_np:1c,2,3 -knpgettext:1c,2,3 -k__:1 -k__n:1,2 -k__p:1c,2 -k__np:1c,2,3 -o "$DESTDIR/templates/$NAME.pot" "${TWIG_CACHE[@]}" {} +
@@ -93,21 +96,6 @@ done
 
 SHA512=$(for i in "$DESTDIR/templates/$NAME"{-js,}".pot"; do [ -r $i ] &&\
   cat $i; done | sed '/^"POT-Creation-Date: /d' | sha512sum | sed 's/\s.*$//')
-
-#if [ -d /var/lib/translations ] && ([ ! -f /var/cache/iserv/devgettext/"$PKG".sha512 ] \
-#  || [ "$(</var/cache/iserv/devgettext/"$PKG".sha512)" != "$SHA512" ])
-#then
-#  echo -n 'Updating translations'
-#  sudo -u pootle -- bash -c ". ~/bin/activate && ~/refresh.sh 2>/dev/null"
-#  echo '.'
-#fi
-
-if [ ! -d /var/cache/iserv/devgettext ]
-then
-  mkdir -m 2775 -p /var/cache/iserv/devgettext
-  chgrp git /var/cache/iserv/devgettext
-fi
-echo "$SHA512" > /var/cache/iserv/devgettext/"$PKG".sha512
 
 for LANG in "de"
 do
