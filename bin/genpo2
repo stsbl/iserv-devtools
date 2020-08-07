@@ -1,0 +1,262 @@
+#!/usr/bin/perl -CSDAL
+use warnings;
+use strict;
+use utf8;
+use File::Basename qw(basename);
+use Cwd qw(abs_path);
+use File::Copy qw(copy);
+use File::Find::Rule;
+use File::Slurp::Unicode;
+use File::Path qw(mkpath rmtree);
+use File::Temp qw(tempfile);
+use Getopt::Long;
+use IPC::Run qw(run);
+use List::MoreUtils qw(uniq);
+
+my ($help);
+GetOptions("help" => \$help) or $help = 1;
+
+print <<USAGE and exit if $help or @ARGV != 1;
+Usage: genpo dir
+Options
+ -h, --help		show this help
+USAGE
+
+my ($dir) = @ARGV;
+$dir = abs_path $dir;
+
+my $err;
+
+my @exclude = qw(debian .git*);
+
+my $lang = "de"; # TODO
+
+my $header =
+  "msgid \"\"\n".
+  "msgstr \"\"\n".
+  "\"MIME-Version: 1.0\\n\"\n".
+  "\"Content-Type: text/plain; charset=UTF-8\\n\"\n".
+  "\"Content-Transfer-Encoding: 8bit\\n\"\n".
+  "\"Plural-Forms: nplurals=2; plural=n != 1;\\n\"\n";
+
+my @xgettext = qw(
+  xgettext --from-code=utf-8 --add-location=file --sort-output -j);
+
+my %process_cmd = (
+  "php3" => [
+    @xgettext,
+    "--language", "PHP",
+    "-k__:1",
+    "-k__n:1,2",
+    "-k__np:1c,2,3",
+    "-k__p:1c,2",
+    "-k_n:1,2",
+    "-k_np:1c,2,3",
+    "-k_p:1c,2",
+    "-knpgettext:1c,2,3",
+    "-kpgettext:1c,2",
+    "-o",
+  ],
+  "js" => [
+    @xgettext,
+    "--language", "JavaScript",
+    "-k_",
+    "-k__",
+    "-k__p:1c,2",
+    "-k_p:1c,2",
+    "-o",
+  ],
+  "php2" => [
+    @xgettext,
+    "--language", "PHP",
+    "-k_c",
+    "-k_date",
+    "-o",
+  ],
+  "perl" => [
+    @xgettext,
+    "--language", "Perl",
+    "-k_",
+    "-o",
+  ],
+  "shell" => [
+    @xgettext,
+    "--language", "Shell",
+    "-o",
+  ],
+);
+
+my $twig2php_out = "/tmp/twig2php-" . basename abs_path $dir;
+
+my %convert_cmd = (
+  "twig" => ["twig2php", "-o", $twig2php_out],
+);
+
+my %convert_target = (
+  "twig" => ["backend", "php3"],
+);
+
+my %convert_out = (
+  "twig" => $twig2php_out,
+);
+
+# magic
+sub new_rule() { File::Find::Rule->new };
+chdir $dir or die "failed to chdir\n";
+my @files =
+  new_rule->or(
+    new_rule->maxdepth(0)->name(@exclude)->prune->discard,
+    new_rule,
+  )->file->in(".");
+
+my (%add, %process, %fn_out, %content, %convert);
+for my $fn (@files)
+{
+  #printf "%s read\n", $fn;
+  my $content = read_file $fn;
+  if ($fn eq "www/inc/locale.inc")
+  {
+    # skip
+  }
+  elsif ($fn =~ q{^locale/.+\.po$})
+  {
+    # po
+    my $target = $fn =~ q{-js\.po$}? "frontend": "backend";
+    die "ambigououououose po for $target!!!\n" if defined $fn_out{$target};
+    $fn_out{$target} = $fn;
+    $content{$target} = $content;
+  }
+  elsif ($fn =~ q{^priv/})
+  {
+    # priv
+    for ($content =~ /^(?:module|title|description)\s+(.+)/mg)
+    {
+      push @{$add{backend}{$_}}, $fn;
+    }
+  }
+  elsif ($fn =~ q{^config/})
+  {
+    # iservcfg
+    for ($content =~ /^(?:name|description|group)\s+(.+)/mg)
+    {
+      push @{$add{backend}{$_}}, $fn;
+    }
+    for (map { split /\|/, $_ } $content =~ /^type\s+select\[(.+)\]/mg)
+    {
+      s/.*=//;
+      push @{$add{backend}{$_}}, $fn;
+    }
+  }
+  elsif ($fn =~ /\.(php|inc|mod)$/ or $content =~ /^#![\w\/]+php/s)
+  {
+    push @{$process{backend}{$fn =~ /^www/? "php2": "php3"}}, $fn;
+  }
+  elsif ($fn =~ /\.js$/)
+  {
+    push @{$process{frontend}{js}}, $fn;
+  }
+  elsif ($fn =~ /\.pm$/ or $content =~ /^#![\w\/]+perl/s)
+  {
+    push @{$process{backend}{perl}}, $fn;
+  }
+  elsif ($fn =~ /\.(sh|templ)$/ or $content =~ /^#!\/bin\/(sh|bash)/s)
+  {
+    push @{$process{backend}{shell}}, $fn;
+  }
+  elsif ($fn =~ /\.(twig)$/)
+  {
+    -d $convert_target{$1} ? rmtree $convert_target{$1} : unlink $convert_target{$1};
+    push @{$convert{$1}}, $fn;
+  }
+}
+
+for my $type (sort keys %convert)
+{
+  system @{$convert_cmd{$type}}, @{$convert{$type}} and die "Could not convert file type $type!\n";
+
+  my @converted_files;
+
+  if (-d $convert_out{$type})
+  {
+    @converted_files = new_rule->file->in($convert_out{$type});
+  }
+  else
+  {
+    push @converted_files, $convert_out{$type};
+  }
+
+  push @{$process{$convert_target{$type}[0]}{$convert_target{$type}[1]}}, @converted_files;
+}
+
+for my $target (qw(backend frontend))
+{
+  next if not $add{$target} and not $process{$target};
+  my $fn_out = $fn_out{$target};
+  my $pot = $header;
+
+  for my $msgid (sort keys %{$add{$target}})
+  {
+    my @fn = uniq sort @{$add{$target}{$msgid}};
+    $msgid =~ s/["\\]/\\$&/g;
+    $pot .= "\n";
+    $pot .= "#: $_\n" for @fn;
+    $pot .= "msgid \"$msgid\"\n";
+    $pot .= "msgstr \"\"\n";
+  }
+  
+  my $fn_tmp;
+  if ($process{$target})
+  {
+    (undef, $fn_tmp) = tempfile("/tmp/genpo.XXXXXXXX");
+
+    write_file $fn_tmp, $pot;
+    for my $source_lang (sort keys %{$process{$target}})
+    {
+      my @cmd = (@{$process_cmd{$source_lang}},
+	$fn_tmp, @{$process{$target}{$source_lang}});
+      run \@cmd or die "xgettext failed: @cmd\n";
+    }
+    $pot = read_file $fn_tmp;
+    unlink $fn_tmp if $pot eq $header;
+  }
+
+  next if $pot eq $header;
+
+  die "no po found for $target\n" if not defined $fn_out;
+
+  mkpath "$dir/locale";
+  mkpath "$dir/locale/templates";
+  my $fn_pot = "$dir/locale/templates/" . basename $fn_out =~ s/\.po$/.pot/gr;
+  copy $fn_tmp, $fn_pot if defined $fn_tmp;
+  # write pot if don't head anything to process and just must add "added" values
+  # like config
+  write_file $fn_pot, $pot unless defined $fn_tmp;
+  unlink $fn_tmp if defined $fn_tmp;
+
+  $pot =~ s/^"Report-Msgid-Bugs-To:.*//m;
+  $pot =~ s/^"POT-Creation-Date:.*//m;
+  $pot =~ s/(?<=^"Content-Type: text\/plain; charset=)CHARSET/UTF-8/m;
+
+  # prepend header if missing
+  my $current = read_file $fn_out;
+  $current = $header . "\n" . $current unless $current =~ /"Content-Type: (.+)"/;
+  write_file $fn_out, $current;
+
+  run [ qw(msgmerge -q -U -N --backup=none), $fn_out, "-" ],
+    "<", \$pot or die "msgmerge failed\n";
+  my $new = read_file $fn_out;
+
+  printf "%s updated\n", $fn_out if $new ne $content{$target};
+
+  $new =~ s/"\n\s*"//g; # Zeilenumbrüche entfernen
+  my @missing = $new =~ /^msgid(?:_plural)? "(.+)"\nmsgstr ""\n/mg;
+  my @unused = $new =~ /^#~ msgid(?:_plural)? "(.+)"\n/mg;
+
+  print sort map "$fn_out missing: $_\n", @missing if @missing;
+  print sort map "$fn_out unused: $_\n", @unused if @unused;
+
+  $err += @missing;
+  $err += @unused;
+}
+
+exit !!$err;
