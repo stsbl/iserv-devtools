@@ -16,6 +16,7 @@ Depends: ${misc:Depends},
   liblist-moreutils-perl,
 # for lintian
   make | build-essential | dpkg-dev,
+  nodejs,
   twig2php,
 Xb-Private-IServ-Revision: ${iserv:Revision}
 Description: Stadtteilschule Blankenese: IServ-Entwicklungswerkzeuge

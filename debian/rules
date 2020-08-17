@@ -2,3 +2,7 @@
 
 %:
 	dh $@ --with iserv --with stsbl
+
+override_dh_iservinstall3:
+	dh_iservinstall3
+	npm --prefix debian/stsbl-iserv-devtools/usr/share/iserv/dev install

@@ -84,20 +84,27 @@ my %process_cmd = (
     "--language", "Shell",
     "-o",
   ],
+  "po" => [
+    "msgcat", "--add-location=file",
+  ],
 );
 
 my $twig2php_out = "/tmp/twig2php-" . basename abs_path $dir;
+my $vue2pot_out = "/tmp/vue2pot-" . basename abs_path $dir;
 
 my %convert_cmd = (
   "twig" => ["twig2php", "-o", $twig2php_out],
+  "vue" => ["js-gettext-extract", "--output", $vue2pot_out],
 );
 
 my %convert_target = (
   "twig" => ["backend", "php3"],
+  "vue" => ["frontend", "po"],
 );
 
 my %convert_out = (
   "twig" => $twig2php_out,
+  "vue" => $vue2pot_out,
 );
 
 # magic
@@ -114,7 +121,7 @@ for my $fn (@files)
 {
   #printf "%s read\n", $fn;
   my $content = read_file $fn;
-  if ($fn eq "www/inc/locale.inc")
+  if ($fn eq "www/inc/locale.inc" or $fn =~ m{/node_modules/})
   {
     # skip
   }
@@ -163,7 +170,7 @@ for my $fn (@files)
   {
     push @{$process{backend}{shell}}, $fn;
   }
-  elsif ($fn =~ /\.(twig)$/)
+  elsif ($fn =~ /\.(twig|vue)$/)
   {
     -d $convert_target{$1} ? rmtree $convert_target{$1} : unlink $convert_target{$1};
     push @{$convert{$1}}, $fn;
@@ -172,7 +179,10 @@ for my $fn (@files)
 
 for my $type (sort keys %convert)
 {
-  system @{$convert_cmd{$type}}, @{$convert{$type}} and die "Could not convert file type $type!\n";
+  my @convert_run;
+  push @convert_run, @{$convert_cmd{$type}};
+  push @convert_run, @{$convert{$type}};
+  run \@convert_run, ">", \my $throw_it_away or die "Could not convert file type $type!\n";
 
   my @converted_files;
 
@@ -204,7 +214,7 @@ for my $target (qw(backend frontend))
     $pot .= "msgstr \"\"\n";
   }
   
-  my $fn_tmp;
+  my ($fn_tmp, $old_fn_tmp);
   if ($process{$target})
   {
     (undef, $fn_tmp) = tempfile("/tmp/genpo.XXXXXXXX");
@@ -214,7 +224,16 @@ for my $target (qw(backend frontend))
     {
       my @cmd = (@{$process_cmd{$source_lang}},
 	$fn_tmp, @{$process{$target}{$source_lang}});
+      if ($source_lang eq "po")
+      {
+      	my (undef, $new_fn_tmp) = tempfile("/tmp/genpo.XXXXXXXX");
+      	push @cmd, ("-o", $new_fn_tmp);
+      	$old_fn_tmp = $fn_tmp;
+      	$fn_tmp = $new_fn_tmp;
+      }
+
       run \@cmd or die "xgettext failed: @cmd\n";
+      do { unlink $old_fn_tmp; undef $old_fn_tmp; } if defined $old_fn_tmp;
     }
     $pot = read_file $fn_tmp;
     unlink $fn_tmp if $pot eq $header;
