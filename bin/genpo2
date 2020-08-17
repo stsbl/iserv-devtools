@@ -223,15 +223,15 @@ for my $target (qw(backend frontend))
     for my $source_lang (sort keys %{$process{$target}})
     {
       my @cmd = (@{$process_cmd{$source_lang}},
-	$fn_tmp, @{$process{$target}{$source_lang}});
+          $fn_tmp, @{$process{$target}{$source_lang}});
       # merge (generated) pot templates (e.g. converted vue files) to the main
       # pot file
       if ($source_lang eq "pot")
       {
-      	my (undef, $new_fn_tmp) = tempfile("/tmp/genpo.XXXXXXXX");
-      	push @cmd, ("-o", $new_fn_tmp);
-      	$old_fn_tmp = $fn_tmp;
-      	$fn_tmp = $new_fn_tmp;
+        my (undef, $new_fn_tmp) = tempfile("/tmp/genpo.XXXXXXXX");
+        push @cmd, ("-o", $new_fn_tmp);
+        $old_fn_tmp = $fn_tmp;
+        $fn_tmp = $new_fn_tmp;
       }
 
       run \@cmd or die "xgettext failed: @cmd\n";
