@@ -84,8 +84,8 @@ my %process_cmd = (
     "--language", "Shell",
     "-o",
   ],
-  "po" => [
-    "msgcat", "--add-location=file",
+  "pot" => [
+    "msgcat", "--add-location=file", "--sort-output",
   ],
 );
 
@@ -99,7 +99,7 @@ my %convert_cmd = (
 
 my %convert_target = (
   "twig" => ["backend", "php3"],
-  "vue" => ["frontend", "po"],
+  "vue" => ["frontend", "pot"],
 );
 
 my %convert_out = (
@@ -182,7 +182,7 @@ for my $type (sort keys %convert)
   my @convert_run;
   push @convert_run, @{$convert_cmd{$type}};
   push @convert_run, @{$convert{$type}};
-  run \@convert_run, ">", \my $throw_it_away or die "Could not convert file type $type!\n";
+  run \@convert_run, ">", \my $throw_it_away or die "covert for type $type failed: @convert_run\n";
 
   my @converted_files;
 
@@ -224,7 +224,9 @@ for my $target (qw(backend frontend))
     {
       my @cmd = (@{$process_cmd{$source_lang}},
 	$fn_tmp, @{$process{$target}{$source_lang}});
-      if ($source_lang eq "po")
+      # merge (generated) pot templates (e.g. converted vue files) to the main
+      # pot file
+      if ($source_lang eq "pot")
       {
       	my (undef, $new_fn_tmp) = tempfile("/tmp/genpo.XXXXXXXX");
       	push @cmd, ("-o", $new_fn_tmp);
