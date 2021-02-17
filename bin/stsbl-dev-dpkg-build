@@ -101,7 +101,7 @@ dh clean
 if [ "$USE_DDIFF" = "yes" ]
 then
   echo "Updating package list ..."
-  apt update
+  apt update || true
   echo "Running ddiff ..."
   ddiff -a "${DDIFF[@]}" | vim -R -
 fi

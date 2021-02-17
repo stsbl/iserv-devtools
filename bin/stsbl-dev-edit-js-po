@@ -4,22 +4,22 @@ PKG="$1"
 
 if [ -z "$PKG" ]
 then
-  PKG=$(basename $PWD)
+  PKG="$(basename "$PWD")"
 fi
 
-NAME="$(echo "$PKG" | sed 's/^stsbl-iserv3-//' | sed 's/^stsbl-iserv-//')"
+NAME="$(echo "$PKG" | sed 's/^stsbl-iserv3-//;s/^stsbl-iserv-//')"
 
-if [ -z "$PKG" ] || [ -z "$NAME" ]
+if [ -z "$PKG" ] || [ -z "$NAME" ] || [ "$1" = "--help" ]
 then
-  echo "Usage: $0 <package>" 1>&2
+  echo "Usage: $0 [package]" 1>&2
   exit 1
 fi
 
-if [ -f "/var/lib/translations/po/iserv3/de/$NAME""-js.po" ]
+if [ -f "locale/$NAME-js.po" ]
 then
-  stsbl-dev-gettext "$PKG"
-  vim -p "/var/lib/translations/po/iserv3/de/$NAME""-js.po"
-  stsbl-dev-gettext "$PKG"
+  genpo2 .
+  vim -p "locale/$NAME-js.po"
+  genpo2 .
 else
   echo "Invalid package name!" 1>&2
 fi
