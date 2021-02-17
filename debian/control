@@ -10,14 +10,15 @@ Package: stsbl-iserv-devtools
 Architecture: all
 Depends: ${misc:Depends},
   ${perl:Depends},
-  iserv-portal,
+  iserv-buildtools,
   iserv-dev,
-  iserv3-dev,
+  iserv-portal,
   liblist-moreutils-perl,
 # for lintian
   make | build-essential | dpkg-dev,
   nodejs,
   twig2php,
+Provides: dh-sequence-stsbl,
 Xb-Private-IServ-Revision: ${iserv:Revision}
 Description: Stadtteilschule Blankenese: IServ-Entwicklungswerkzeuge
  Enthält die von der Stadtteilschule Blankenese zur IServ-Entwicklung
