@@ -2,24 +2,22 @@ Source: stsbl-iserv-devtools
 Section: misc
 Priority: optional
 Maintainer: Stadtteilschule Blankenese <repository@stsbl.de>
-Build-Depends: debhelper (>= 10)
-Build-Depends-Indep: iserv-buildtools
+Build-Depends: debhelper-compat (= 13), dh-sequence-iserv, dh-sequence-stsbl
 Standards-Version: 4.5.0
 
 Package: stsbl-iserv-devtools
 Architecture: all
-Depends: ${misc:Depends},
-  ${perl:Depends},
-  iserv-buildtools,
-  iserv-dev,
-  iserv-portal,
-  liblist-moreutils-perl,
-# for lintian
-  make | build-essential | dpkg-dev,
-  nodejs,
-  twig2php,
-Provides: dh-sequence-stsbl,
-Xb-Private-IServ-Revision: ${iserv:Revision}
+Depends: iserv-buildtools,
+         iserv-dev,
+         iserv-portal,
+         liblist-moreutils-perl,
+         make | build-essential | dpkg-dev,
+         nodejs,
+         twig2php,
+         ${misc:Depends},
+         ${perl:Depends}
+Provides: dh-sequence-stsbl
+Xb-Private-Iserv-Revision: ${iserv:Revision}
 Description: Stadtteilschule Blankenese: IServ-Entwicklungswerkzeuge
  Enthält die von der Stadtteilschule Blankenese zur IServ-Entwicklung
  verwendeten Tools und Skripte.
