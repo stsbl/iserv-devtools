@@ -1,6 +1,7 @@
-#!/bin/bash -e
+#!/bin/bash
+set -e
 
-export LC_ALL=C
+export LC_MESSAGES=C
 
 NATIVE=no
 USE_DDIFF=yes
@@ -35,32 +36,38 @@ then
   REVISION=
   PLAINREVISION=
 fi
-# link deb file
-if [ -e "../""$PACKAGE""_""$UPSTREAMVERSION""$REVISION""_all.deb" ] && [ -L "../""$PACKAGE""_""$UPSTREAMVERSION""$REVISION""_all.deb" ]
-then
-  rm -f ../"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb
-elif [ -e "../""$PACKAGE""_""$UPSTREAMVERSION""$REVISION""_all.deb" ] && [ ! -L "../""$PACKAGE""_""$UPSTREAMVERSION""$REVISION""_all.deb" ]
-then
-  echo "Destination .deb exists and is not a symbolic link! Terminating!" >&2
-  exit 1
-fi
 
 if [ ! -e "/root/$PACKAGE/$UPSTREAMVERSION/$PLAINREVISION" ]
 then
   mkdir -pv /root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"
 fi
 
-# create destionations
-if [ ! -e "/root/package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$PLAINREVISION""/""$PACKAGE""_""$UPSTREAMVERSION""$REVISION""_all.deb" ]
-then
-  touch /root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb
-fi
+FILES=("${PACAKGE}_${UPSTREAMVERSION}${REVISION}_amd64.buildinfo" "${PACKAGE}_${UPSTREAMVERSION}${REVISION}_amd64.changes" "${PACKAGE}_${UPSTREAMVERSION}${REVISION}.debian.tar.xz" "${PACKAGE}_${UPSTREAMVERSION}${REVISION}.dsc" "${PACKAGE}_$UPSTREAMVERSION.orig.tar.gz" "${PACKAGE}_${UPSTREAMVERSION}${REVISION}_all.deb" "${PACKAGE}_$UPSTREAMVERSION.git")
+
+for FILE in "${FILES[@]}"
+do
+
+  # create destionations
+  if [ ! -e "/root/package-pool/$PACKAGE/$UPSTREAMVERSION/$PLAINREVISION/$FILE" ]
+  then
+    touch "/root/package-pool/$PACKAGE/$UPSTREAMVERSION/$PLAINREVISION/$FILE"
+  fi
+
+  # link files
+  if [ -e "../$FILE" ] && [ -L "../$FILE" ]
+  then
+    rm -f "../$FILE"
+  elif [ -e "../$FILE" ] && [ ! -L "../$FILE" ]
+  then
+    mv -v "../$FILE" "/root/package-pool/$PACKAGE/$UPSTREAMVERSION/$PLAINREVISION/$FILE"
+  fi
+
+  # link destinations
+  ln -sfv "/root/package-pool/$PACKAGE/$UPSTREAMVERSION/$PLAINREVISION/$FILE" "../$FILE"
+done
 
 DDIFF=()
-
-# link destinations
 DDIFF+=(/root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb)
-ln -sfv /root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb ../"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb
 
 for i in $ADDITIONALBINARYPACKAGES
 do
@@ -86,17 +93,20 @@ do
   fi
 done
 
-debuild $DEBUILDARGS -us -uc -b
+debuild $DEBUILDARGS
 
 # remove links
-rm -f ../"$PACKAGE"_"$UPSTREAMVERSION""$REVISION"_all.deb
+for FILE in "${FILES[@]}"
+do
+  rm -f "../$FILE"
+done
 
 for i in $ADDITIONALBINARYPACKAGES
 do
   rm -f ../"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb
 done
 
-dh clean
+debuild -- clean
 
 if [ "$USE_DDIFF" = "yes" ]
 then
