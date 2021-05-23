@@ -1,3 +1,15 @@
+stsbl-iserv-devtools (21.05.24.1) stable; urgency=medium
+
+  [ dependabot ]
+  * Bumps [postcss](https://github.com/postcss/postcss) from 8.2.6 to
+    8.2.15.
+
+  [ Felix Jacobi ]
+  * stsbl-dev-dpkg-make-src: Dereference templates on copying
+  * stsbl-dev-dpkg-build: Enhanced source package support
+
+ -- Felix Jacobi <Felix@jacobi-hamburg.net>  Mon, 24 May 2021 01:35:01 +0200
+
 stsbl-iserv-devtools (21.05.02.1) stable; urgency=medium
 
   * Fixed Build-Depends
