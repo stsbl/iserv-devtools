@@ -1,3 +1,17 @@
+stsbl-iserv-devtools (21.07.04.1) stable; urgency=medium
+
+  [ dependabot[bot] ]
+  * Bumps [browserslist](https://github.com/browserslist/browserslist)
+    from 4.16.3 to 4.16.6.
+
+  [ Felix Jacobi ]
+  * Stsbl-dev-dpkg-build: Updated for better native package support and
+    for new repository pool mechanism
+  * Dh-sequence-stsbl: Updated for compat level 13
+  * Updated npm dependencies
+
+ -- Felix Jacobi <Felix@jacobi-hamburg.net>  Sun, 04 Jul 2021 21:34:16 +0200
+
 stsbl-iserv-devtools (21.05.24.1) stable; urgency=medium
 
   [ dependabot ]
