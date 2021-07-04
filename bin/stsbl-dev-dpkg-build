@@ -6,12 +6,14 @@ export LC_MESSAGES=C
 NATIVE=no
 USE_DDIFF=yes
 
-while getopts "dhn" option
+while getopts "dhnr:" option
 do
   case $option in
     (d) USE_DDIFF=no
     ;;
     (n) NATIVE=yes
+    ;;
+    (r) RELEASE="$OPTARG"
     ;;
     (h) cat <<EOUSAGE ; exit 0;;
 Usage: $(basename $0) [options]
@@ -37,33 +39,22 @@ then
   PLAINREVISION=
 fi
 
+
+debuild $DEBUILDARGS
+
 if [ ! -e "/root/$PACKAGE/$UPSTREAMVERSION/$PLAINREVISION" ]
 then
   mkdir -pv /root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"
 fi
 
-FILES=("${PACAKGE}_${UPSTREAMVERSION}${REVISION}_amd64.buildinfo" "${PACKAGE}_${UPSTREAMVERSION}${REVISION}_amd64.changes" "${PACKAGE}_${UPSTREAMVERSION}${REVISION}.debian.tar.xz" "${PACKAGE}_${UPSTREAMVERSION}${REVISION}.dsc" "${PACKAGE}_$UPSTREAMVERSION.orig.tar.gz" "${PACKAGE}_${UPSTREAMVERSION}${REVISION}_all.deb" "${PACKAGE}_$UPSTREAMVERSION.git"  "${PACKAGE}_$UPSTREAMVERSION.tar.xz")
+FILES=("${PACKAGE}_${UPSTREAMVERSION}${REVISION}_amd64.buildinfo" "${PACKAGE}_${UPSTREAMVERSION}${REVISION}_amd64.changes" "${PACKAGE}_${UPSTREAMVERSION}${REVISION}.debian.tar.xz" "${PACKAGE}_${UPSTREAMVERSION}${REVISION}.dsc" "${PACKAGE}_$UPSTREAMVERSION.orig.tar.gz" "${PACKAGE}_${UPSTREAMVERSION}${REVISION}_all.deb" "${PACKAGE}_$UPSTREAMVERSION.git"  "${PACKAGE}_$UPSTREAMVERSION.tar.xz")
 
 for FILE in "${FILES[@]}"
 do
-
-  # create destionations
-  if [ ! -e "/root/package-pool/$PACKAGE/$UPSTREAMVERSION/$PLAINREVISION/$FILE" ]
-  then
-    touch "/root/package-pool/$PACKAGE/$UPSTREAMVERSION/$PLAINREVISION/$FILE"
-  fi
-
-  # link files
-  if [ -e "../$FILE" ] && [ -L "../$FILE" ]
-  then
-    rm -f "../$FILE"
-  elif [ -e "../$FILE" ] && [ ! -L "../$FILE" ]
+  if [ -f "../$FILE" ]
   then
     mv -v "../$FILE" "/root/package-pool/$PACKAGE/$UPSTREAMVERSION/$PLAINREVISION/$FILE"
   fi
-
-  # link destinations
-  ln -sfv "/root/package-pool/$PACKAGE/$UPSTREAMVERSION/$PLAINREVISION/$FILE" "../$FILE"
 done
 
 DDIFF=()
@@ -73,37 +64,10 @@ for i in $ADDITIONALBINARYPACKAGES
 do
   if ! [ "$i" = "$PACKAGE" ]
   then
-    # link deb file
-    if [ -e "../""$i""_""$UPSTREAMVERSION""$REVISION""_all.deb" ] && [ -L "../""$i""_""$UPSTREAMVERSION""$REVISION""_all.deb" ]
-    then
-      rm -f ../"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb
-    elif [ -e "/root/""$i""_""$UPSTREAMVERSION""$REVISION""_all.deb" ] && [ ! -L "../$i""_""$UPSTREAMVERSION""$REVISION""_all.deb" ]
-    then
-      echo "Destination .deb exists and is not a symbolic link! Terminating!" >&2
-      exit 1
-    fi
-
-    if [ ! -e "/root/package-pool/""$PACKAGE""/""$UPSTREAMVERSION""/""$PLAINREVISION""/""$i""_""$UPSTREAMVERSION""$REVISION""_all.deb" ]
-    then
-      touch /root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb
-    fi
 
     DDIFF+=(/root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb)
-    ln -sfv /root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb ../"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb
+    mv -v ../"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb /root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb 
   fi
-done
-
-debuild $DEBUILDARGS
-
-# remove links
-for FILE in "${FILES[@]}"
-do
-  rm -f "../$FILE"
-done
-
-for i in $ADDITIONALBINARYPACKAGES
-do
-  rm -f ../"$i"_"$UPSTREAMVERSION""$REVISION"_all.deb
 done
 
 debuild -- clean
@@ -114,4 +78,20 @@ then
   apt update || true
   echo "Running ddiff ..."
   ddiff -a "${DDIFF[@]}" | vim -R -
+fi
+
+if [ -n "$RELEASE" ]
+then
+  for DEB in "${DDIFF[@]}"
+  do
+    cp -a -v "$DEB" ~repository0/Homepage/debian/add/"$RELEASE"
+  done
+
+  for SRC_FILE in "${PACKAGE}_${UPSTREAMVERSION}${REVISION}.debian.tar.xz" "${PACKAGE}_${UPSTREAMVERSION}${REVISION}.dsc" "${PACKAGE}_$UPSTREAMVERSION.orig.tar.gz" "${PACKAGE}_$UPSTREAMVERSION.git"  "${PACKAGE}_$UPSTREAMVERSION.tar.xz"
+  do
+    if [ -f "/root/package-pool/$PACKAGE/$UPSTREAMVERSION/$PLAINREVISION/$SRC_FILE" ]
+    then
+      cp -a -v "/root/package-pool/$PACKAGE/$UPSTREAMVERSION/$PLAINREVISION/$SRC_FILE" ~repository0/Homepage/debian/add-src/"$RELEASE"
+    fi
+  done
 fi
