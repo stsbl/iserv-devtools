@@ -74,10 +74,8 @@ debuild -- clean
 
 if [ "$USE_DDIFF" = "yes" ]
 then
-  echo "Updating package list ..."
-  apt update || true
   echo "Running ddiff ..."
-  ddiff -a "${DDIFF[@]}" | vim -R -
+  reposh ddiff -a "${DDIFF[@]}" | vim -R -
 fi
 
 if [ -n "$RELEASE" ]
