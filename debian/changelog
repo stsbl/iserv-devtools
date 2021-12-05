@@ -1,3 +1,13 @@
+stsbl-iserv-devtools (21.12.05.1) stable; urgency=medium
+
+  * Rules: Prevent modifying package-lock.json by replacing `npm install`
+    with `npm ci`
+  * Stsbl-dev-dpkg-build: Use ddiff via reposh
+  * Stsbl-dev-dpkg-make-src: Removed obsolete adjustments of source tree
+  * Updated npm packages
+
+ -- Felix Jacobi <Felix@jacobi-hamburg.net>  Sun, 05 Dec 2021 08:22:33 +0100
+
 stsbl-iserv-devtools (21.08.17.1) stable; urgency=medium
 
   * Stsbl-dev-dpkg-build: Fixed non-native GIT source packages
