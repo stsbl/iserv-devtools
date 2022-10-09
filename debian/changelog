@@ -1,3 +1,9 @@
+stsbl-iserv-devtools (22.10.10.2) stable; urgency=medium
+
+  * Updated NPM dependencies
+
+ -- Felix Jacobi <Felix@jacobi-hamburg.net>  Mon, 10 Oct 2022 00:35:31 +0200
+
 stsbl-iserv-devtools (22.10.10.1) stable; urgency=medium
 
   * stsbl-dev-edit-po: Added support for *3.po
