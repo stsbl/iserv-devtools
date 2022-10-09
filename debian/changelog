@@ -1,3 +1,10 @@
+stsbl-iserv-devtools (22.10.10.1) stable; urgency=medium
+
+  * stsbl-dev-edit-po: Added support for *3.po
+  * stsblnewrelease: Added
+
+ -- Felix Jacobi <Felix@jacobi-hamburg.net>  Mon, 10 Oct 2022 00:09:37 +0200
+
 stsbl-iserv-devtools (21.12.05.1) stable; urgency=medium
 
   * Rules: Prevent modifying package-lock.json by replacing `npm install`
