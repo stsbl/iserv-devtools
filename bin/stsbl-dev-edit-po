@@ -20,6 +20,11 @@ then
   genpo2 .
   vim -p "locale/$NAME.po"
   genpo2 .
+elif [ -f "locale/${NAME}3.po" ]
+then
+  genpo2 .
+  vim -p "locale/${NAME}3.po"
+  genpo2 .
 else
   echo "Invalid package name!" 1>&2
 fi

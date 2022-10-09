@@ -1,0 +1,241 @@
+#!/bin/bash
+
+set -e
+
+get_version() {
+  dpkg-parsechangelog | sed -n 's/^Version: //p'
+}
+
+validate_suite() {
+  if [[ ! $1 =~ ^(stable|testing|unstable)$ ]]
+  then
+    return 1
+  fi
+}
+
+set_suite() {
+  if [ -n "$SUITE" ]
+  then
+    echo "Only one of the options -r, -s, -t, -u, --suite, --stable, --testing, --unstable can be specified." >&2
+    exit 1
+  fi
+
+  if ! validate_suite "$1"
+  then
+    echo "Only suites stable, testing and unstable are supported." >&2
+    exit 1
+  fi
+
+  SUITE=$1
+}
+
+usage() {
+  cat <<-EOT
+	Usage: $(basename "$0") [OPTIONS]
+	
+	Valid options:
+	
+	  -a, --all           Use all commit messages (instead only merges) for
+	                      changelog
+	  -C, --no-create     Do not create branch for SUITE if it does not exist
+	  -h, --help          Show this help
+	  -L, --no-changelog  Skip creating changelog entries
+	  -M, --no-master     Just prepare to release current branch and leave other
+	                      branches untouched
+	  -P, --no-pull       Skip update of current branch
+	  -Q, --no-push       Skip pushing updated branches
+	  -r, --suite=SUITE   Release to SUITE suite (Default: current branch if valid
+	                      or "unstable")
+	  -s, --stable        Release to "stable" suite
+	  -t, --testing       Release to "testing" suite
+	  -u, --unstable      Release to "unstable" suite
+	
+	EOT
+}
+
+if ! OPTIONS=$(getopt -o 'aChLMPQr:stu' --long 'no-create,no-changelog,help,no-master,no-pull,no-push,all,suite:,stable,testing,unstable' -n "$(basename "$0")" -- "$@")
+then
+  usage
+  exit 1
+fi
+
+eval set -- "$OPTIONS"
+unset OPTIONS
+
+ALL=
+CREATE=1
+LOG=1
+MASTER=1
+PULL=1
+PUSH=1
+
+while true; do
+  case "$1" in
+    '-C'|'--no-create')
+      CREATE=
+      shift
+      continue
+    ;;
+    '-h'|'--help')
+      usage
+      exit
+    ;;
+    '-L'|'--no-changelog')
+      LOG=
+      shift
+      continue
+    ;;
+    '-M'|'--no-master')
+      MASTER=
+      shift
+      continue
+    ;;
+    '-P'|'--no-pull')
+      PULL=
+      shift
+      continue
+                ;;
+    '-Q'|'--no-push')
+      PUSH=
+      shift
+      continue
+                ;;
+    '-a'|'--all')
+      ALL=1
+      shift
+      continue
+    ;;
+    '-r'|'--suite')
+      set_suite "$2"
+      shift 2
+      continue
+    ;;
+    '-s'|'--stable')
+      set_suite stable
+      shift
+      continue
+    ;;
+    '-t'|'--testing')
+      set_suite testing
+      shift
+      continue
+    ;;
+    '-u'|'--unstable')
+      set_suite unstable
+      shift
+      continue
+    ;;
+    '--')
+      shift
+      break
+    ;;
+    *)
+      echo 'Internal error while parsing options!' >&2
+      exit 1
+    ;;
+  esac
+done
+
+if [ -z "$SUITE" ]
+then
+  CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+  if validate_suite "$CURRENT_BRANCH"
+  then
+    set_suite "$CURRENT_BRANCH"
+  else
+    set_suite unstable
+  fi
+fi
+
+CURRENTEPOCH=$(get_version | sed -r -n 's/^([0-9]*:)?([0-9]{2}\.[0-9]{2}\.[0-9]{2})\.([0-9]+).*$/\1/p')
+CURRENTDATE=$(get_version | sed -r -n 's/^([0-9]*:)?([0-9]{2}\.[0-9]{2}\.[0-9]{2})\.([0-9]+).*$/\2/p')
+CURRENTREV=$(get_version | sed -r -n 's/^([0-9]*:)?([0-9]{2}\.[0-9]{2}\.[0-9]{2})\.([0-9]+).*$/\3/p')
+DATE=$(date +%y.%m.%d)
+
+if [ "$DATE" == "$CURRENTDATE" ]
+then
+  REV=$((CURRENTREV + 1))
+else
+  REV=1
+fi
+
+VER=$DATE'.'$REV
+
+if [ "$CURRENTEPOCH" ]
+then
+  VER="$CURRENTEPOCH$VER"
+fi
+
+echo "Releasing $VER"
+
+if [ $MASTER ]
+then
+  git fetch origin
+
+  if ! git show-ref "origin/$SUITE" >/dev/null
+  then
+    if [ $CREATE ]
+    then
+      git branch "$SUITE" master
+      git push --force origin "$SUITE":"$SUITE"
+    else
+      echo "Branch $SUITE unstable does not exist. Run without -C to create." >&2
+      exit 1
+    fi
+  fi
+
+  if [ "$(git rev-parse origin/master)" != "$(git rev-parse master)" ]
+  then
+    if [ $PULL ]
+    then
+      git pull
+    else
+      echo "master is out of date, consider running 'git pull' while you are on master" >&2
+      exit 1
+    fi
+  fi
+
+  git checkout "$SUITE"
+  git reset --hard master
+fi
+
+if [ $LOG ]
+then
+  GBP_DCH_OPTIONS=()
+  if [ ! $ALL ]
+  then
+    GBP_DCH_OPTIONS=("--git-log=--merges")
+  fi
+
+  gbp dch --ignore-branch "${GBP_DCH_OPTIONS[@]}" -a -N"$VER" --git-author \
+      --full --debian-tag="iserv/%(version)s" \
+      --customizations='/usr/lib/iserv/gbp-dch.py'
+
+  dch -rD"$SUITE" --no-force-save-on-release
+  git add debian/changelog
+fi
+
+VER=$(get_version)
+git commit -m "Released $VER"
+
+get_vendor() {
+  perl -mDpkg::Control::Info \
+      -e 'print Dpkg::Control::Info->new()->get_source()->{"Source"} =~ /^(\w+)/;'
+}
+
+git "${GIT_TAG_CMD:-tag}" "$(get_vendor)/$(get_version)" -f -m ''
+
+if [ $MASTER ]
+then
+  git checkout master
+  git merge "$SUITE"
+fi
+
+if [ $PUSH ]
+then
+  for REMOTE in $(git remote)
+  do
+    git branch --list master "$SUITE" | sed 's/^..//' | xargs git push "$REMOTE" --
+    git push --tags --force "$REMOTE"
+  done
+fi
