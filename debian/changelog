@@ -1,3 +1,10 @@
+stsbl-iserv-devtools (22.11.09.1) stable; urgency=medium
+
+  * stsbl-dev-dpkg-build: Added support configuring ddiff command
+  * stsbl-dev-dpkg-build: Make target directory configurable
+
+ -- Felix Jacobi <Felix@jacobi-hamburg.net>  Wed, 09 Nov 2022 18:51:56 +0100
+
 stsbl-iserv-devtools (22.10.10.2) stable; urgency=medium
 
   * Updated NPM dependencies
