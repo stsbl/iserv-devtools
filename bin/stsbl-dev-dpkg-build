@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+if [ -f "/etc/stsbl/devtools/dpkg-build" ]
+then
+  . /etc/stsbl/devtools/dpkg-build
+fi
+
 export LC_MESSAGES=C
 
 NATIVE=no
@@ -75,7 +80,7 @@ debuild -- clean
 if [ "$USE_DDIFF" = "yes" ]
 then
   echo "Running ddiff ..."
-  reposh ddiff -a "${DDIFF[@]}" | vim -R -
+  ${DDIFF_COMMAND:-ddiff} -a "${DDIFF[@]}" | vim -R -
 fi
 
 if [ -n "$RELEASE" ]
