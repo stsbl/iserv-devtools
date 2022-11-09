@@ -87,14 +87,16 @@ if [ -n "$RELEASE" ]
 then
   for DEB in "${DDIFF[@]}"
   do
-    cp -a -v "$DEB" ~repository0/Homepage/debian/add/"$RELEASE"
+    mkdir -p -v "${COPY_BIN_TARGET_PATH:-/root/release}/$RELEASE"
+    cp -a -v "$DEB" "${COPY_BIN_TARGET_PATH:-/root/release}/$RELEASE"
   done
 
   for SRC_FILE in "${PACKAGE}_${UPSTREAMVERSION}${REVISION}.debian.tar.xz" "${PACKAGE}_${UPSTREAMVERSION}${REVISION}.dsc" "${PACKAGE}_$UPSTREAMVERSION.orig.tar.gz" "${PACKAGE}_$UPSTREAMVERSION.git" "${PACKAGE}_$UPSTREAMVERSION$REVISION.git" "${PACKAGE}_$UPSTREAMVERSION.tar.xz"
   do
     if [ -f "/root/package-pool/$PACKAGE/$UPSTREAMVERSION/$PLAINREVISION/$SRC_FILE" ]
     then
-      cp -a -v "/root/package-pool/$PACKAGE/$UPSTREAMVERSION/$PLAINREVISION/$SRC_FILE" ~repository0/Homepage/debian/add-src/"$RELEASE"
+      mkdir -p -v "${COPY_SRC_TARGET_PATH:-/root/release-src}/$RELEASE"
+      cp -a -v "/root/package-pool/$PACKAGE/$UPSTREAMVERSION/$PLAINREVISION/$SRC_FILE" "${COPY_SRC_TARGET_PATH:-/root/release-src}/$RELEASE"
     fi
   done
 fi
