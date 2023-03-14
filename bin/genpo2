@@ -13,13 +13,18 @@ use Getopt::Long;
 use IPC::Run qw(run);
 use List::MoreUtils qw(uniq);
 
-my ($help);
-GetOptions("help" => \$help) or $help = 1;
+my $help_exit = 0;
+my %opt;
+GetOptions(\%opt,
+  "help|h",
+  "only-pot|t"
+) or do { $opt{help} = 1; $help_exit = 1; };
 
-print <<USAGE and exit if $help or @ARGV != 1;
+print STDERR <<USAGE and exit $help_exit if $opt{help} or @ARGV != 1;
 Usage: genpo dir
 Options
  -h, --help		show this help
+ -t, --only-pot		do not check and update po file, only maintain pot file
 USAGE
 
 my ($dir) = @ARGV;
@@ -121,7 +126,7 @@ for my $fn (@files)
 {
   #printf "%s read\n", $fn;
   my $content = read_file $fn;
-  if ($fn eq "www/inc/locale.inc" or $fn =~ m{/node_modules/})
+  if ($fn eq "www/inc/locale.inc" or $fn =~ m{/(?:var/cache|node_modules|vendor)/})
   {
     # skip
   }
@@ -201,6 +206,8 @@ for my $type (sort keys %convert)
 for my $target (qw(backend frontend))
 {
   next if not $add{$target} and not $process{$target};
+  $fn_out{$target} = "locale/$lang/" . basename($dir) .
+      ($target eq "frontend" ? "-js" : "") . ".po" unless $fn_out{$target};
   my $fn_out = $fn_out{$target};
   my $pot = $header;
 
@@ -258,26 +265,29 @@ for my $target (qw(backend frontend))
   $pot =~ s/^"POT-Creation-Date:.*//m;
   $pot =~ s/(?<=^"Content-Type: text\/plain; charset=)CHARSET/UTF-8/m;
 
-  # prepend header if missing
-  my $current = read_file $fn_out;
-  $current = $header . "\n" . $current unless $current =~ /"Content-Type: (.+)"/;
-  write_file $fn_out, $current;
+  unless ($opt{"only-pot"})
+  {
+    # prepend header if missing
+    my $current = read_file $fn_out;
+    $current = $header . "\n" . $current unless $current =~ /"Content-Type: (.+)"/;
+    write_file $fn_out, $current;
 
-  run [ qw(msgmerge -q -U -N --backup=none), $fn_out, "-" ],
-    "<", \$pot or die "msgmerge failed\n";
-  my $new = read_file $fn_out;
+    run [ qw(msgmerge -q -U -N --backup=none), $fn_out, "-" ],
+      "<", \$pot or die "msgmerge failed\n";
+    my $new = read_file $fn_out;
 
-  printf "%s updated\n", $fn_out if $new ne $content{$target};
+    printf "%s updated\n", $fn_out if $new ne $content{$target};
 
-  $new =~ s/"\n\s*"//g; # Zeilenumbrüche entfernen
-  my @missing = $new =~ /^msgid(?:_plural)? "(.+)"\nmsgstr ""\n/mg;
-  my @unused = $new =~ /^#~ msgid(?:_plural)? "(.+)"\n/mg;
+    $new =~ s/"\n\s*"//g; # Zeilenumbrüche entfernen
+    my @missing = $new =~ /^msgid(?:_plural)? "(.+)"\nmsgstr ""\n/mg;
+    my @unused = $new =~ /^#~ msgid(?:_plural)? "(.+)"\n/mg;
 
-  print sort map "$fn_out missing: $_\n", @missing if @missing;
-  print sort map "$fn_out unused: $_\n", @unused if @unused;
+    print sort map "$fn_out missing: $_\n", @missing if @missing;
+    print sort map "$fn_out unused: $_\n", @unused if @unused;
 
-  $err += @missing;
-  $err += @unused;
+    $err += @missing;
+    $err += @unused;
+  }
 }
 
 exit !!$err;
