@@ -185,7 +185,7 @@ my (%add, %process, %fn_out, %content, %convert);
 for my $fn (@files)
 {
   my $content = read_file $fn unless $opt{"list-processed-files"};
-  if ($fn eq "www/inc/locale.inc" or $fn =~ m{(?:^|/)(?:var/cache|node_modules|vendor)/})
+  if ($fn eq "www/inc/locale.inc" or $fn =~ m{(?:(?:^|/)(?:var/cache|node_modules|vendor|public/static|public/bundles)/|/polyfill\.min\.js$)})
   {
     # skip
   }
