@@ -13,28 +13,84 @@ use Getopt::Long;
 use IPC::Run qw(run);
 use List::MoreUtils qw(uniq);
 
+my $dir;
+my $po_name; # probably his name is Wario
+my $lang = "de"; # TODO
+
+sub fix_headers($)
+{
+  my ($pot) = @_;
+
+  $pot =~ s/^"Report-Msgid-Bugs-To:.*\n//m;
+  $pot =~ s/^"POT-Creation-Date:.*\n//m;
+  $pot =~ s/^"Language-Team: .*\n//m;
+  $pot =~ s/^"Last-Translator: .*\n//m;
+  $pot =~ s/^"PO-Revision-Date:.*\n//m;
+  $pot =~ s/(?<=^"Content-Type: text\/plain; charset=)CHARSET/UTF-8/m;
+  my $pkg = $po_name;
+  my $uc_pkg = uc($pkg);
+  $pot =~ s/SOME DESCRIPTIVE TITLE/TRANSLATION CATALOG OF $uc_pkg/;
+  my $year = 1900 + (localtime)[5];
+  $pot =~ s/YEAR IServ GmbH/$year IServ GmbH/;
+  $pot =~ s/# FIRST AUTHOR <EMAIL\@ADDRESS>, YEAR\./# IServ GmbH <info\@iserv.eu>, $year./;
+  $pot =~ s/PACKAGE/$pkg/;
+  $pot =~ s/CHARSET/UTF-8/;
+  $pot =~ s{#: /tmp/twig2php-[^/]+/}{#: }g;
+
+  $pot;
+}
+
+sub get_po_name($)
+{
+  my ($dir) = @_;
+  if (-f "$dir/debian/control")
+  {
+    my $pkg = (qx(cd $dir && dh_listpackages | head -n 1) =~ s/^iserv-//gr);
+    $pkg =~ s/^iserv3-(.+)/${1}3/g;
+    chomp $pkg;
+    return $pkg if length $pkg;
+  }
+  elsif (-f "$dir/composer.json")
+  {
+    my $pkg = ((qx(cd $dir && jq -r '.name' composer.json) =~ s{^(iserv-|iserv/)}{}gr) =~ s{/}{-}gr);
+    chomp $pkg;
+    return $pkg if length $pkg;
+  }
+
+  return basename($dir);
+}
+
+
 my $help_exit = 0;
 my %opt;
 GetOptions(\%opt,
+  "list-processed-files|f",
   "help|h",
+  "root-dir|r=s",
+  "list|l",
   "only-pot|t"
 ) or do { $opt{help} = 1; $help_exit = 1; };
 
 print STDERR <<USAGE and exit $help_exit if $opt{help} or @ARGV != 1;
 Usage: genpo dir
 Options
- -h, --help		show this help
- -t, --only-pot		do not check and update po file, only maintain pot file
+ -f, --list-processed-files	only list all processed files
+ -h, --help                	show this help
+ -l, --list                	list pot files and po files (last only when not using -t) to be
+                           	generated
+ -r, --root-dir            	root directory for extracting translations (default: locale)
+ -t, --only-pot            	do not check and update po file, only maintain pot file
 USAGE
 
-my ($dir) = @ARGV;
+my $root_dir = $opt{"root-dir"} // "locale";
+
+($dir) = @ARGV;
 $dir = abs_path $dir;
+$po_name = get_po_name($dir);
 
 my $err;
 
 my @exclude = qw(debian .git*);
-
-my $lang = "de"; # TODO
 
 my $header =
   "msgid \"\"\n".
@@ -44,8 +100,12 @@ my $header =
   "\"Content-Transfer-Encoding: 8bit\\n\"\n".
   "\"Plural-Forms: nplurals=2; plural=n != 1;\\n\"\n";
 
-my @xgettext = qw(
-  xgettext --from-code=utf-8 --add-location=file --sort-output -j);
+my @xgettext = (
+  qw(xgettext),
+  "--copyright-holder=IServ GmbH",
+  "--package-name=" . $po_name,
+  qw(--from-code=utf-8 --add-location=file --sort-output -j)
+);
 
 my %process_cmd = (
   "php3" => [
@@ -124,13 +184,18 @@ my @files =
 my (%add, %process, %fn_out, %content, %convert);
 for my $fn (@files)
 {
-  #printf "%s read\n", $fn;
-  my $content = read_file $fn;
-  if ($fn eq "www/inc/locale.inc" or $fn =~ m{/(?:var/cache|node_modules|vendor)/})
+  my $content = read_file $fn unless $opt{"list-processed-files"};
+  if ($fn eq "www/inc/locale.inc" or $fn =~ m{(?:^|/)(?:var/cache|node_modules|vendor)/})
   {
     # skip
   }
-  elsif ($fn =~ q{^locale/.+\.po$})
+  elsif ($opt{"list-processed-files"})
+  {
+    next if $fn =~ m{^\Q$root_dir/\E};
+    print "$fn\n";
+    next;
+  }
+  elsif ($fn =~ m{^\Q$root_dir\E/.+\.po$})
   {
     # po
     my $target = $fn =~ q{-js\.po$}? "frontend": "backend";
@@ -182,6 +247,8 @@ for my $fn (@files)
   }
 }
 
+exit if $opt{"list-processed-files"};
+
 for my $type (sort keys %convert)
 {
   my @convert_run;
@@ -206,7 +273,7 @@ for my $type (sort keys %convert)
 for my $target (qw(backend frontend))
 {
   next if not $add{$target} and not $process{$target};
-  $fn_out{$target} = "locale/$lang/" . basename($dir) .
+  $fn_out{$target} = "$root_dir/$lang/" . $po_name .
       ($target eq "frontend" ? "-js" : "") . ".po" unless $fn_out{$target};
   my $fn_out = $fn_out{$target};
   my $pot = $header;
@@ -220,7 +287,7 @@ for my $target (qw(backend frontend))
     $pot .= "msgid \"$msgid\"\n";
     $pot .= "msgstr \"\"\n";
   }
-  
+
   my ($fn_tmp, $old_fn_tmp);
   if ($process{$target})
   {
@@ -245,48 +312,77 @@ for my $target (qw(backend frontend))
       do { unlink $old_fn_tmp; undef $old_fn_tmp; } if defined $old_fn_tmp;
     }
     $pot = read_file $fn_tmp;
-    unlink $fn_tmp if $pot eq $header;
+    if ($pot eq $header)
+    {
+      unlink $fn_tmp;
+    }
+    else
+    {
+      $pot = fix_headers $pot;
+    }
   }
 
   next if $pot eq $header;
 
   die "no po found for $target\n" if not defined $fn_out;
 
-  mkpath "$dir/locale";
-  mkpath "$dir/locale/templates";
-  my $fn_pot = "$dir/locale/templates/" . basename $fn_out =~ s/\.po$/.pot/gr;
-  copy $fn_tmp, $fn_pot if defined $fn_tmp;
-  # write pot if don't head anything to process and just must add "added" values
-  # like config
-  write_file $fn_pot, $pot unless defined $fn_tmp;
-  unlink $fn_tmp if defined $fn_tmp;
-
-  $pot =~ s/^"Report-Msgid-Bugs-To:.*//m;
-  $pot =~ s/^"POT-Creation-Date:.*//m;
-  $pot =~ s/(?<=^"Content-Type: text\/plain; charset=)CHARSET/UTF-8/m;
+  my $fn_pot = "$dir/$root_dir/templates/" . basename $fn_out =~ s/\.po$/.pot/gr;
+  if ($opt{list})
+  {
+    my ($out) = "$fn_pot\n" =~ s{^\Q$dir\E/}{}gr;
+    print $out;
+  }
+  else
+  {
+    mkpath "$dir/$root_dir";
+    mkpath "$dir/$root_dir/templates";
+    if (defined $fn_tmp)
+    {
+      copy $fn_tmp, $fn_pot;
+      unlink $fn_tmp ;
+      my $pot = read_file $fn_pot;
+      $pot = fix_headers $pot;
+      write_file $fn_pot, $pot;
+    }
+    else
+    {
+      $pot = fix_headers $pot;
+      # write pot if don't head anything to process and just must add "added" values
+      # like config
+      write_file $fn_pot, $pot;
+    }
+  }
 
   unless ($opt{"only-pot"})
   {
-    # prepend header if missing
-    my $current = read_file $fn_out;
-    $current = $header . "\n" . $current unless $current =~ /"Content-Type: (.+)"/;
-    write_file $fn_out, $current;
+    if ($opt{list})
+    {
+      my ($out) = "$fn_out\n" =~ s{^\Q$dir\E/}{}gr;
+      print $out;
+    }
+    else
+    {
+      # prepend header if missing
+      my $current = read_file $fn_out;
+      $current = $header . "\n" . $current unless $current =~ /"Content-Type: (.+)"/;
+      write_file $fn_out, $current;
 
-    run [ qw(msgmerge -q -U -N --backup=none), $fn_out, "-" ],
-      "<", \$pot or die "msgmerge failed\n";
-    my $new = read_file $fn_out;
+      run [ qw(msgmerge -q -U -N --backup=none), $fn_out, "-" ],
+           "<", \$pot or die "msgmerge failed\n";
+      my $new = read_file $fn_out;
 
-    printf "%s updated\n", $fn_out if $new ne $content{$target};
+      printf "%s updated\n", $fn_out if $new ne $content{$target};
 
-    $new =~ s/"\n\s*"//g; # Zeilenumbrüche entfernen
-    my @missing = $new =~ /^msgid(?:_plural)? "(.+)"\nmsgstr ""\n/mg;
-    my @unused = $new =~ /^#~ msgid(?:_plural)? "(.+)"\n/mg;
+      $new =~ s/"\n\s*"//g; # Zeilenumbrüche entfernen
+      my @missing = $new =~ /^msgid(?:_plural)? "(.+)"\nmsgstr ""\n/mg;
+      my @unused = $new =~ /^#~ msgid(?:_plural)? "(.+)"\n/mg;
 
-    print sort map "$fn_out missing: $_\n", @missing if @missing;
-    print sort map "$fn_out unused: $_\n", @unused if @unused;
+      print sort map "$fn_out missing: $_\n", @missing if @missing;
+      print sort map "$fn_out unused: $_\n", @unused if @unused;
 
-    $err += @missing;
-    $err += @unused;
+      $err += @missing;
+      $err += @unused;
+    }
   }
 }
 
