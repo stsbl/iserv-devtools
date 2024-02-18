@@ -17,9 +17,19 @@ fi
 
 if [ -f "locale/$NAME-js.po" ]
 then
-  genpo2 .
+  genpo -L de .
   vim -p "locale/$NAME-js.po"
-  genpo2 .
+  genpo -L de .
+elif [ -f "locale/${NAME}3-js.po" ]
+then
+  genpo -L de .
+  vim -p "locale/${NAME}3-js.po"
+  genpo -L de .
+elif [ -f "locale/de/${PKG}-js.po" ]
+then
+  genpo -L de .
+  vim -p "locale/de/${PKG}-js.po"
+  genpo -L de .
 else
   echo "Invalid package name!" 1>&2
 fi

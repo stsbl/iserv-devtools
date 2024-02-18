@@ -17,14 +17,19 @@ fi
 
 if [ -f "locale/$NAME.po" ]
 then
-  genpo2 .
+  genpo -L de .
   vim -p "locale/$NAME.po"
-  genpo2 .
+  genpo -L de .
 elif [ -f "locale/${NAME}3.po" ]
 then
-  genpo2 .
+  genpo -L de .
   vim -p "locale/${NAME}3.po"
-  genpo2 .
+  genpo -L de .
+elif [ -f "locale/de/${PKG}.po" ]
+then
+  genpo -L de .
+  vim -p "locale/de/${PKG}.po"
+  genpo -L de .
 else
   echo "Invalid package name!" 1>&2
 fi
