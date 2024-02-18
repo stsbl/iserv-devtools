@@ -36,5 +36,3 @@ print "\n";
 
 system "stsbl-webpack", "-p", @args and
     error "Failed to run webpack: $!";
-system "git", "add", "--intent-to-add", "public/assets" and
-    error "Failed to add assets: $!";
