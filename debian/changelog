@@ -1,3 +1,12 @@
+stsbl-iserv-devtools (24.03.07.1) stable; urgency=medium
+
+  * iservmake: Disabled Pootle download
+  * stsbl-dev-dpkg-build: Fixed moving deb files
+  * Updated npm dependencies
+  * Removed genpo2 (replaced by sucessor genpo in iserv-buildtools)
+
+ -- Felix Jacobi <Felix@jacobi-hamburg.net>  Thu, 07 Mar 2024 23:14:08 +0100
+
 stsbl-iserv-devtools (24.02.18.1) stable; urgency=medium
 
   * Improved and prepared genpo2 to be moved to iserv-buildtools
