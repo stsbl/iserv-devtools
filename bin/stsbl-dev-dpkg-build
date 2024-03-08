@@ -1,15 +1,21 @@
 #!/bin/bash
 set -e
 
+get_distribution() {
+  dpkg-parsechangelog | sed -n 's/^Distribution: //p'
+}
+
+get_version() {
+  dpkg-parsechangelog | sed -n 's/^Version: //p'
+}
+
+
 if [ -f "/etc/stsbl/devtools/dpkg-build" ]
 then
   . /etc/stsbl/devtools/dpkg-build
 fi
 
 export LC_MESSAGES=C
-
-NATIVE=no
-USE_DDIFF=yes
 
 while getopts "dhnr:" option
 do
@@ -30,13 +36,39 @@ EOUSAGE
   esac
 done
 
-ADDITIONALBINARYPACKAGES=$(awk '$1 == "Package:" { print $2 }' debian/control)
-PACKAGE=$(dpkg-parsechangelog | awk '$1 == "Source:" { print $2 }')
-VERSION=$(dpkg-parsechangelog | awk '$1 == "Version:" { print $2 }')
+DISTRO="$(get_distribution)"
+if [ "$RELEASE" ]
+then
+  # bypass
+  true
+elif [[ "$DISTRO" ]]
+then
+  RELEASE="$DISTRO"
+else
+  RELEASE=unstable
+fi
+
+if [ "$NATIVE" ]
+then
+  # bypass
+  true
+elif [[ "$(get_version)" =~ /-/ ]]
+then
+  NATIVE=no
+else
+  NATIVE=yes
+fi
+
+USE_DDIFF=yes
+
+
+ADDITIONALBINARYPACKAGES="$(awk '$1 == "Package:" { print $2 }' debian/control)"
+PACKAGE="$(dpkg-parsechangelog | awk '$1 == "Source:" { print $2 }')"
+VERSION="$(dpkg-parsechangelog | awk '$1 == "Version:" { print $2 }')"
 UPSTREAMVERSION=${VERSION%-*}
 
-REVISION="-"${VERSION#*-}
-PLAINREVISION=${VERSION#*-}
+REVISION="-${VERSION#*-}"
+PLAINREVISION="${VERSION#*-}"
 
 if [ "$NATIVE" = "yes" ]
 then
