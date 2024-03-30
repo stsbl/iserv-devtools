@@ -101,9 +101,8 @@ for i in $ADDITIONALBINARYPACKAGES
 do
   if ! [ "$i" = "$PACKAGE" ]
   then
-
-    DDIFF+=(/root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$i"_"$UPSTREAMVERSION""$REVISION"_*.deb)
     mv -v ../"$i"_"$UPSTREAMVERSION""$REVISION"_*.deb /root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/
+    DDIFF+=(/root/package-pool/"$PACKAGE"/"$UPSTREAMVERSION"/"$PLAINREVISION"/"$i"_"$UPSTREAMVERSION""$REVISION"_*.deb)
   fi
 done
 
