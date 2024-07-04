@@ -126,8 +126,8 @@ then
   do
     if [ -f "/root/package-pool/$PACKAGE/$UPSTREAMVERSION/$PLAINREVISION/$SRC_FILE" ]
     then
-      mkdir -p -v "${COPY_SRC_TARGET_PATH:-/root/release-src}/$RELEASE"
-      cp -a -v "/root/package-pool/$PACKAGE/$UPSTREAMVERSION/$PLAINREVISION/$SRC_FILE" "${COPY_SRC_TARGET_PATH:-/root/release-src}/$RELEASE"
+      mkdir -p -v "${COPY_SRC_TARGET_PATH:-/root/release}/$RELEASE"
+      cp -a -v "/root/package-pool/$PACKAGE/$UPSTREAMVERSION/$PLAINREVISION/$SRC_FILE" "${COPY_SRC_TARGET_PATH:-/root/release}/$RELEASE"
     fi
   done
 fi
