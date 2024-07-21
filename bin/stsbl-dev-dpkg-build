@@ -48,11 +48,11 @@ else
   RELEASE=unstable
 fi
 
-if [ "$NATIVE" ]
+if [ "$NATIVE" = "yes" ]
 then
   # bypass
   true
-elif [[ "$(get_version)" =~ /-/ ]]
+elif [[ "$(get_version)" =~ - ]]
 then
   NATIVE=no
 else
