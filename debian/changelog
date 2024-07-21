@@ -1,3 +1,9 @@
+stsbl-iserv-devtools (24.07.21.1) testing; urgency=medium
+
+  * stsbl-dev-dpkg-build: Fixed native detection
+
+ -- Felix Jacobi <Felix@jacobi-hamburg.net>  Sun, 21 Jul 2024 17:38:05 +0200
+
 stsbl-iserv-devtools (24.07.05.1) testing; urgency=medium
 
   * stsbl-dev-dpkg-build: Updated default source file upload path
